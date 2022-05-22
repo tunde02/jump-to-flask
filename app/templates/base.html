@@ -14,7 +14,12 @@
     <title>Hello, pybo!</title>
 </head>
 <body>
+<!-- 내비게이션바 -->
+{% include "navbar.html" %}
+
 {% block content %}
 {% endblock %}
+<!-- Bootstrap JS -->
+<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
 </body>
 </html>

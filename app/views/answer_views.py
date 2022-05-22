@@ -13,6 +13,7 @@ bp = Blueprint('answer', __name__, url_prefix='/answer')
 def create(question_id):
     form = AnswerForm()
     question = Question.query.get_or_404(question_id)
+
     if form.validate_on_submit():
         answer = Answer(question=question, content=request.form['content'], create_date=datetime.now())
 
