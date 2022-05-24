@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Blueprint, render_template, request, url_for, g
+from flask import Blueprint, render_template, request, url_for, g, flash
 from werkzeug.utils import redirect
 from app import db
 from app.models import Question
@@ -40,3 +40,45 @@ def create():
         return redirect(url_for('main.index'))
 
     return render_template('question/question_form.html', form=form)
+
+
+@bp.route('/modify/<int:question_id>', methods=['GET', 'POST'])
+@login_required
+def modify(question_id):
+    question = Question.query.get_or_404(question_id)
+
+    if g.user != question.user:
+        flash('수정 권한이 없습니다.')
+
+        return redirect(url_for('question.detail', question_id=question_id))
+
+    if request.method == 'POST': # POST
+        form = QuestionForm()
+
+        if form.validate_on_submit():
+            form.populate_obj(question)
+            question.modify_date = datetime.now()
+
+            db.session.commit()
+
+            return redirect(url_for('question.detail', question_id=question_id))
+    else: # GET
+        form = QuestionForm(obj=question)
+
+    return render_template('question/question_form.html', form=form)
+
+
+@bp.route('/delete/<int:question_id>')
+@login_required
+def delete(question_id):
+    question = Question.query.get_or_404(question_id)
+
+    if g.user != question.user:
+        flash("삭제 권한이 없습니다.")
+
+        return redirect(url_for('question.detail', question_id=question_id))
+
+    db.session.delete(question)
+    db.session.commit()
+
+    return redirect(url_for('question._list'))
