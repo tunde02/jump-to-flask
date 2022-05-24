@@ -66,3 +66,18 @@ def delete(answer_id):
         db.session.commit()
 
     return redirect(url_for('question.detail', question_id=question_id))
+
+
+@bp.route('/vote/<int:answer_id>')
+@login_required
+def vote(answer_id):
+    answer = Answer.query.get_or_404(answer_id)
+
+    if g.user == answer.user:
+        flash("본인이 작성한 글은 추천할 수 없습니다.")
+    else:
+        answer.voter.append(g.user) # 동일한 사용자가 여러 번 추천해도 내부적으로 중복되지 않게끔 처리됨
+
+        db.session.commit()
+
+    return redirect(url_for('question.detail', question_id=answer.question.id))
