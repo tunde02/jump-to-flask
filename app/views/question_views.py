@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, url_for, g, flash
 from werkzeug.utils import redirect
 from app import db
-from app.models import Question
+from app.models import Question, Answer, User
 from app.forms import QuestionForm, AnswerForm
 from app.views.auth_views import login_required
 
@@ -13,10 +13,27 @@ bp = Blueprint('question', __name__, url_prefix='/question')
 @bp.route('/list')
 def _list():
     page = request.args.get('page', type=int, default=1)
+    kw = request.args.get('kw', type=str, default='')
     question_list = Question.query.order_by(Question.create_date.desc())
+
+    if kw:
+        search = '%%{}%%'.format(kw)
+        subquery = db.session.query(Answer.question_id, Answer.content, User.username) \
+            .join(User, Answer.user_id == User.id).subquery()
+        question_list = question_list \
+            .join(User) \
+            .outerjoin(subquery, subquery.c.question_id == Question.id) \
+            .filter(Question.subject.ilike(search) |   # 질문 제목
+                    Question.content.ilike(search) |   # 질문 내용
+                    User.username.ilike(search) |      # 질문 작성자
+                    subquery.c.content.ilike(search) | # 답변 내용
+                    subquery.c.username.ilike(search)  # 답변 작성자
+                    ) \
+            .distinct()
+
     question_list = question_list.paginate(page, per_page=10)
 
-    return render_template('question/question_list.html', question_list=question_list)
+    return render_template('question/question_list.html', question_list=question_list, page=page, kw=kw)
 
 
 @bp.route('/detail/<int:question_id>')
