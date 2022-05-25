@@ -3,6 +3,6 @@ import os
 
 BASE_DIR = os.path.dirname(__file__)
 
-SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(os.path.join(BASE_DIR, 'pybo.db'))
+SQLALCHEMY_DATABASE_URI = 'mysql://root:zfds1245@127.0.0.1:3306/jump_to_flask'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SECRET_KEY = "dev"
