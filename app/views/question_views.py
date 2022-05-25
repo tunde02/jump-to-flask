@@ -40,8 +40,10 @@ def _list():
 def detail(question_id):
     form = AnswerForm()
     question = Question.query.get_or_404(question_id)
+    page = request.args.get('page', type=int, default=1)
+    answer_list = Answer.query.filter(Answer.question_id == question.id).paginate(page, per_page=5)
 
-    return render_template('question/question_detail.html', question=question, form=form)
+    return render_template('question/question_detail.html', question=question, answer_list=answer_list, form=form)
 
 
 @bp.route('/create', methods=['GET', 'POST'])

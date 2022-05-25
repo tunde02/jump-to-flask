@@ -24,7 +24,10 @@ def create(question_id):
 
         return redirect(url_for('question.detail', question_id=question_id))
 
-    return render_template('question/question_detail.html', question=question, form=form)
+    page = request.args.get('page', type=int, default=1)
+    answer_list = question.answer_set.paginate(page, per_page=10)
+
+    return render_template('question/question_detail.html', question=question, answer_list=answer_list, form=form)
 
 
 @bp.route('/modify/<int:answer_id>', methods=['GET', 'POST'])
