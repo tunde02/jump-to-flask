@@ -2,4 +2,6 @@ __pycache__
 app/__pycache__
 app/views/__pycache__
 migration/__pycache__
-
+pybo.db
+*.pyc
+migrations
