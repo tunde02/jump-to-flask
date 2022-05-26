@@ -41,9 +41,19 @@ def detail(question_id):
     form = AnswerForm()
     question = Question.query.get_or_404(question_id)
     page = request.args.get('page', type=int, default=1)
-    answer_list = Answer.query.filter(Answer.question_id == question.id).paginate(page, per_page=5)
+    sort = request.args.get('sort', type=int, default=0)
+    answer_list = Answer.query.filter(Answer.question_id == question.id)
 
-    return render_template('question/question_detail.html', question=question, answer_list=answer_list, form=form)
+    if sort == 0: # 추천순
+        answer_list = answer_list.order_by(Answer.num_voter.desc(), Answer.create_date.desc())
+    elif sort == 1: # 최신순
+        answer_list = answer_list.order_by(Answer.create_date.desc())
+    elif sort == 3: # 오래된순
+        answer_list = answer_list.order_by(Answer.create_date)
+
+    answer_list = answer_list.paginate(page, per_page=5)
+
+    return render_template('question/question_detail.html', question=question, answer_list=answer_list, form=form, sort=sort)
 
 
 @bp.route('/create', methods=['GET', 'POST'])

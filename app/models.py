@@ -19,6 +19,7 @@ class Question(db.Model):
     modify_date = db.Column(db.DateTime(), nullable=True)
     voter       = db.relationship('User', secondary=question_voter,
         backref=db.backref('question_voter_set'))
+    num_voter   = db.Column(db.Integer, nullable=False)
 
 
 answer_voter = db.Table(
@@ -40,6 +41,7 @@ class Answer(db.Model):
     modify_date = db.Column(db.DateTime(), nullable=True)
     voter       = db.relationship('User', secondary=answer_voter,
         backref=db.backref('answer_voter_set'))
+    num_voter   = db.Column(db.Integer, nullable=False)
 
 
 class User(db.Model):

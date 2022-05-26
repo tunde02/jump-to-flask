@@ -21,21 +21,28 @@
             </div>
             <div class="my-3">
                 <a href="javascript:void(0)" data-uri="{{ url_for('question.vote', question_id=question.id) }}"
-                    class="recommend btn btn-sm btn-outline-secondary"> 추천
+                    class="recommend btn btn-sm btn-outline-primary"> 추천
                     <span class="badge rounded-pill bg-success">{{ question.voter|length }}</span>
                 </a>
                 {% if g.user == question.user %}
                 <a href="{{ url_for('question.modify', question_id=question.id) }}"
-                    class="btn btn-sm btn-outline-secondary">수정</a>
+                    class="btn btn-sm btn-outline-primary">수정</a>
                 <a href="javascript:void(0)" data-uri="{{ url_for('question.delete', question_id=question.id) }}"
-                    class="delete btn btn-sm btn-outline-secondary">삭제</a>
+                    class="delete btn btn-sm btn-danger">삭제</a>
                 {% endif %}
             </div>
         </div>
     </div>
 
     <!-- 답변 목록 -->
-    <h5 class="border-bottom my-3 py-2">{{ question.answer_set|length }}개의 답변이 있습니다.</h5>
+    <div class="d-flex justify-content-between">
+        <h5 class="border-bottom">{{ question.answer_set|length }}개의 답변이 있습니다.</h5>
+        <div class="btn-group" data->
+            <button class="answer-sort-btn btn btn-sm btn-outline-primary {{ 'active' if sort == 0 }}" data-sort="{{ 0 }}">추천순</button>
+            <button class="answer-sort-btn btn btn-sm btn-outline-primary {{ 'active' if sort == 1 }}" data-sort="{{ 1 }}">최신순</button>
+            <button class="answer-sort-btn btn btn-sm btn-outline-primary {{ 'active' if sort == 2 }}" data-sort="{{ 2 }}">오래된순</button>
+        </div>
+    </div>
     {% for answer in answer_list.items %}
     <div class="card my-3">
         <div class="card-body">
@@ -54,14 +61,14 @@
             </div>
             <div class="my-3">
                 <a href="javascript:void(0)" data-uri="{{ url_for('answer.vote', answer_id=answer.id) }}"
-                    class="recommend btn btn-sm btn-outline-secondary"> 추천
-                    <span class="badge rounded-pill bg-success">{{ answer.voter|length }}</span>
+                    class="recommend btn btn-sm btn-outline-primary"> 추천
+                    <span class="badge rounded-pill bg-success">{{ answer.num_voter }}</span>
                 </a>
                 {% if g.user == answer.user %}
                 <a href="{{ url_for('answer.modify', answer_id=answer.id) }}"
-                    class="btn btn-sm btn-outline-secondary">수정</a>
+                    class="btn btn-sm btn-outline-primary">수정</a>
                 <a href="javascript:void(0)" data-uri="{{ url_for('answer.delete', answer_id=answer.id) }}"
-                    class="delete btn btn-sm btn-secondary">삭제</a>
+                    class="delete btn btn-sm btn-danger">삭제</a>
                 {% endif %}
             </div>
         </div>
@@ -73,7 +80,7 @@
         <!-- 이전 페이지 -->
         {% if answer_list.has_prev %}
         <li class="page-item">
-            <a class="page-link" href="?page={{ answer_list.prev_num }}">이전</a>
+            <a class="page-link" data-page="{{ answer_list.prev_num }}" href="javascript:void(0)">이전</a>
         </li>
         {% else %}
         <li class="page-item disabled">
@@ -86,7 +93,7 @@
         {% if page_num %}
         {% if page_num != answer_list.page %}
         <li class="page-item">
-            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+            <a class="page-link" data-page="{{ page_num }}" href="javascript:void(0)">{{ page_num }}</a>
         </li>
         {% else %}
         <!-- 현재 페이지 링크 비활성화 -->
@@ -104,7 +111,7 @@
         <!-- 다음 페이지 -->
         {% if answer_list.has_next %}
         <li class="page-item">
-            <a class="page-link" href="?page={{ answer_list.next_num }}">다음</a>
+            <a class="page-link" data-page="{{ answer_list.next_num }}" href="javascript:void(0)">다음</a>
         </li>
         {% else %}
         <li class="page-item disabled">
@@ -125,6 +132,10 @@
         <input type="submit" value="답변등록" class="btn btn-primary">
     </form>
 </div>
+<form id="searchForm" method="get" action="{{ url_for('question.detail', question_id=question.id) }}">
+    <input type="hidden" id="page" name="page" value="{{ page }}">
+    <input type="hidden" id="sort" name="sort" value="{{ sort }}">
+</form>
 {% endblock %}
 
 {% block script %}
@@ -144,6 +155,23 @@ Array.from(recommend_elements).forEach(function(element) {
         if (confirm("정말로 추천하시겠습니까?")) {
             location.href = this.dataset.uri;
         }
+    });
+});
+
+const page_elements = document.getElementsByClassName("page-link");
+Array.from(page_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        document.getElementById('page').value = this.dataset.page;
+        document.getElementById('searchForm').submit();
+    });
+});
+
+const answer_sort_btn_elements = document.getElementsByClassName("answer-sort-btn");
+Array.from(answer_sort_btn_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        document.getElementById('sort').value = this.dataset.sort;
+        document.getElementById('page').value = 1;
+        document.getElementById('searchForm').submit();
     });
 });
 </script>

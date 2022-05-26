@@ -51,7 +51,7 @@
         <!-- 이전 페이지 -->
         {% if question_list.has_prev %}
         <li class="page-item">
-            <a class="page-link" href="javascript:void(0)" data-page="?page={{ question_list.prev_num }}">이전</a>
+            <a class="page-link" href="javascript:void(0)" data-page="{{ question_list.prev_num }}">이전</a>
         </li>
         {% else %}
         <li class="page-item disabled">

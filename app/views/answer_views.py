@@ -78,8 +78,11 @@ def vote(answer_id):
 
     if g.user == answer.user:
         flash("본인이 작성한 글은 추천할 수 없습니다.")
+    elif g.user in answer.voter:
+        flash("이미 추천한 글입니다.")
     else:
-        answer.voter.append(g.user) # 동일한 사용자가 여러 번 추천해도 내부적으로 중복되지 않게끔 처리됨
+        answer.voter.append(g.user)
+        answer.num_voter += 1
 
         db.session.commit()
 
