@@ -15,11 +15,11 @@ class Question(db.Model):
     create_date = db.Column(db.DateTime(), nullable=False)
     user_id     = db.Column(db.Integer,
         db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    user        = db.relationship('User', backref=db.backref('question_set'))
+    user        = db.relationship('User', backref=db.backref('question_set', passive_deletes=True))
     modify_date = db.Column(db.DateTime(), nullable=True)
     voter       = db.relationship('User', secondary=question_voter,
-        backref=db.backref('question_voter_set'))
-    num_voter   = db.Column(db.Integer, nullable=False)
+        backref=db.backref('question_voter_set', passive_deletes=True))
+    num_voter   = db.Column(db.Integer, nullable=False, default=0)
 
 
 answer_voter = db.Table(
@@ -32,7 +32,7 @@ answer_voter = db.Table(
 class Answer(db.Model):
     id          = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id', ondelete='CASCADE'))
-    question    = db.relationship('Question', backref=db.backref('answer_set'))
+    question    = db.relationship('Question', backref=db.backref('answer_set', passive_deletes=True))
     content     = db.Column(db.Text(), nullable=False)
     create_date = db.Column(db.DateTime(), nullable=False)
     user_id     = db.Column(db.Integer,
@@ -40,8 +40,8 @@ class Answer(db.Model):
     user        = db.relationship('User', backref=db.backref('answer_set'))
     modify_date = db.Column(db.DateTime(), nullable=True)
     voter       = db.relationship('User', secondary=answer_voter,
-        backref=db.backref('answer_voter_set'))
-    num_voter   = db.Column(db.Integer, nullable=False)
+        backref=db.backref('answer_voter_set', passive_deletes=True))
+    num_voter   = db.Column(db.Integer, nullable=False, default=0)
 
 
 class User(db.Model):
@@ -49,3 +49,16 @@ class User(db.Model):
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     email    = db.Column(db.String(120), unique=True, nullable=False)
+
+
+class Comment(db.Model):
+    id          = db.Column(db.Integer, primary_key=True)
+    content     = db.Column(db.Text(), nullable=False)
+    create_date = db.Column(db.DateTime(), nullable=False)
+    modify_date = db.Column(db.DateTime(), nullable=True)
+    answer_id   = db.Column(db.Integer,
+        db.ForeignKey('answer.id', ondelete='CASCADE'), nullable=False)
+    answer      = db.relationship('Answer', backref=db.backref('comment_set', passive_deletes=True))
+    user_id     = db.Column(db.Integer,
+        db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    user        = db.relationship('User', backref=db.backref('comment_set', passive_deletes=True))

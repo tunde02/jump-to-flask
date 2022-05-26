@@ -48,7 +48,7 @@ def detail(question_id):
         answer_list = answer_list.order_by(Answer.num_voter.desc(), Answer.create_date.desc())
     elif sort == 1: # 최신순
         answer_list = answer_list.order_by(Answer.create_date.desc())
-    elif sort == 3: # 오래된순
+    elif sort == 2: # 오래된순
         answer_list = answer_list.order_by(Answer.create_date)
 
     answer_list = answer_list.paginate(page, per_page=5)

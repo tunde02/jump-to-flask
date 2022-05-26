@@ -2,8 +2,8 @@ from datetime import datetime
 from flask import Blueprint, url_for, request, render_template, g, flash
 from werkzeug.utils import redirect
 from app import db
-from app.models import Question, Answer
-from app.forms import AnswerForm
+from app.models import Question, Answer, Comment
+from app.forms import AnswerForm, CommentForm
 from app.views.auth_views import login_required
 
 
@@ -24,10 +24,11 @@ def create(question_id):
 
         return redirect(url_for('question.detail', question_id=question_id))
 
-    page = request.args.get('page', type=int, default=1)
-    answer_list = question.answer_set.paginate(page, per_page=10)
+    answer_list = Answer.query.filter(Answer.question_id == question_id) \
+        .order_by(Answer.num_voter.desc(), Answer.create_date.desc()) \
+        .paginate(page=1, per_page=5)
 
-    return render_template('question/question_detail.html', question=question, answer_list=answer_list, form=form)
+    return render_template('question/question_detail.html', question=question, answer_list=answer_list, form=form, sort=0)
 
 
 @bp.route('/modify/<int:answer_id>', methods=['GET', 'POST'])
@@ -87,3 +88,24 @@ def vote(answer_id):
         db.session.commit()
 
     return redirect(url_for('question.detail', question_id=answer.question.id))
+
+
+@bp.route('/comment/<int:answer_id>', methods=['POST'])
+@login_required
+def create_comment(answer_id):
+    form = CommentForm()
+    answer = Answer.query.get_or_404(answer_id)
+
+    if form.validate_on_submit():
+        comment = Comment(answer=answer, user=g.user, content=request.form['content'], create_date=datetime.now())
+
+        db.session.add(comment)
+        db.session.commit()
+
+        return redirect(url_for('question.detail', question_id=answer.question.id))
+
+    answer_list = Answer.query.filter(Answer.question_id == answer.question.id) \
+        .order_by(Answer.num_voter.desc(), Answer.create_date.desc()) \
+        .paginate(page=1, per_page=5)
+
+    return render_template('question/question_detail.html', question=answer.question, answer_list=answer_list, form=form, sort=0)

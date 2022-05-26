@@ -21,7 +21,8 @@
             </div>
             <div class="my-3">
                 <a href="javascript:void(0)" data-uri="{{ url_for('question.vote', question_id=question.id) }}"
-                    class="recommend btn btn-sm btn-outline-primary"> 추천
+                    class="recommend btn btn-sm btn-outline-primary">
+                    추천
                     <span class="badge rounded-pill bg-success">{{ question.voter|length }}</span>
                 </a>
                 {% if g.user == question.user %}
@@ -37,7 +38,7 @@
     <!-- 답변 목록 -->
     <div class="d-flex justify-content-between">
         <h5 class="border-bottom">{{ question.answer_set|length }}개의 답변이 있습니다.</h5>
-        <div class="btn-group" data->
+        <div class="btn-group">
             <button class="answer-sort-btn btn btn-sm btn-outline-primary {{ 'active' if sort == 0 }}" data-sort="{{ 0 }}">추천순</button>
             <button class="answer-sort-btn btn btn-sm btn-outline-primary {{ 'active' if sort == 1 }}" data-sort="{{ 1 }}">최신순</button>
             <button class="answer-sort-btn btn btn-sm btn-outline-primary {{ 'active' if sort == 2 }}" data-sort="{{ 2 }}">오래된순</button>
@@ -46,32 +47,58 @@
     {% for answer in answer_list.items %}
     <div class="card my-3">
         <div class="card-body">
-            <div class="card-text">{{ answer.content|markdown }}</div>
-            <div class="d-flex justify-content-end">
-                {% if answer.modify_date %}
-                <div class="badge bg-light p-2 text-dark text-start mx-3">
-                    <div class="mb-2">수정 시간</div>
-                    <div>{{ answer.modify_date|datetime }}</div>
+            <div class="card-text d-flex justify-content-between">
+                <div class="mx-2">
+                    {{ answer.content|markdown }}
                 </div>
-                {% endif %}
-                <div class="badge bg-light p-2 text-dark text-start">
-                    <div class="mb-2">{{ answer.user.username }}</div>
-                    <div>{{ answer.create_date|datetime }}</div>
+                <div>
+                    {% if answer.modify_date %}
+                    <div class="badge bg-light text-dark text-start">
+                        <div class="mb-2">수정 시간</div>
+                        <div>{{ answer.modify_date|datetime }}</div>
+                    </div>
+                    {% endif %}
+                    <div class="badge bg-light text-dark text-start">
+                        <div class="mb-2">{{ answer.user.username }}</div>
+                        <div>{{ answer.create_date|datetime }}</div>
+                    </div>
                 </div>
             </div>
-            <div class="my-3">
-                <a href="javascript:void(0)" data-uri="{{ url_for('answer.vote', answer_id=answer.id) }}"
-                    class="recommend btn btn-sm btn-outline-primary"> 추천
+            <div class="mx-2">
+                <a href="javascript:answer_comment({{ answer.id }})" class="comment btn btn-sm btn-outline-primary">
+                    댓글
+                    <span class="badge rounded-pill bg-success">{{ answer.comment_set|length }}</span>
+                </a>
+                <a href="javascript:void(0)" data-uri="{{ url_for('answer.vote', answer_id=answer.id) }}" class="recommend btn btn-sm btn-outline-primary">
+                    추천
                     <span class="badge rounded-pill bg-success">{{ answer.num_voter }}</span>
                 </a>
                 {% if g.user == answer.user %}
-                <a href="{{ url_for('answer.modify', answer_id=answer.id) }}"
-                    class="btn btn-sm btn-outline-primary">수정</a>
-                <a href="javascript:void(0)" data-uri="{{ url_for('answer.delete', answer_id=answer.id) }}"
-                    class="delete btn btn-sm btn-danger">삭제</a>
+                <a href="{{ url_for('answer.modify', answer_id=answer.id) }}" class="btn btn-sm btn-outline-primary">수정</a>
+                <a href="javascript:void(0)" data-uri="{{ url_for('answer.delete', answer_id=answer.id) }}" class="delete btn btn-sm btn-danger">삭제</a>
                 {% endif %}
             </div>
         </div>
+        <!-- 답변 댓글 Start -->
+        <div class="comment-list">
+            {% for comment in answer.comment_set %}
+            <div class="border-top d-flex justify-content-start px-2 py-2" style="font-size: 0.9em;">
+                <div class="badge bg-light text-dark text-start" style="height: 0%;">
+                    <div class="mb-2">{{ comment.user.username }}</div>
+                    <div>{{ comment.create_date|datetime }}</div>
+                </div>
+                <div class="mx-3">{{ comment.content|markdown }}</div>
+            </div>
+            {% endfor %}
+            <div id="comment_block_{{ answer.id }}" class="comment-block" style="display: none;">
+                <form method="post" action="{{ url_for('answer.create_comment', answer_id=answer.id) }}">
+                    {{ form.csrf_token }}
+                    <textarea {% if not g.user %}disabled{% endif %} class="form-control" name="content" rows="3" style="font-size: 0.9em;"></textarea>
+                    <input type="submit" value="작성" class="btn btn-sm btn-primary mx-1 my-3">
+                </form>
+            </div>
+        </div>
+        <!-- 답변 댓글 End -->
     </div>
     {% endfor %}
 
@@ -125,7 +152,6 @@
     <!-- 답변 등록 -->
     <form action="{{ url_for('answer.create', question_id=question.id) }}" method="post" class="my-3">
         {{ form.csrf_token }}
-        {% include 'form_errors.html' %}
         <div class="mb-3">
             <textarea {% if not g.user %}disabled{% endif %} name="content" id="content" class="form-control" rows="10">{{ form.content.data or '' }}</textarea>
         </div>
@@ -171,8 +197,14 @@ Array.from(answer_sort_btn_elements).forEach(function(element) {
     element.addEventListener('click', function() {
         document.getElementById('sort').value = this.dataset.sort;
         document.getElementById('page').value = 1;
+        console.log(document.getElementById('sort').value)
         document.getElementById('searchForm').submit();
     });
 });
+
+function answer_comment(answer_id) {
+    document.getElementById("comment_block_" + answer_id).style.display = "";
+    document.getElementById("comment_block_" + answer_id).getElementsByTagName("textarea")[0].focus();
+}
 </script>
 {% endblock %}
