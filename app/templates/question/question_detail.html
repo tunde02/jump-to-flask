@@ -82,12 +82,19 @@
         <!-- 답변 댓글 Start -->
         <div class="comment-list">
             {% for comment in answer.comment_set %}
-            <div class="border-top d-flex justify-content-start px-2 py-2" style="font-size: 0.9em;">
-                <div class="badge bg-light text-dark text-start" style="height: 0%;">
-                    <div class="mb-2">{{ comment.user.username }}</div>
-                    <div>{{ comment.create_date|datetime }}</div>
+            <div class="border-top d-flex justify-content-between px-2 py-2" style="font-size: 0.9em;">
+                <div class="d-flex justify-content-start">
+                    <div class="badge bg-light text-dark text-start" style="height: fit-content;">
+                        <div class="mb-2">{{ comment.user.username }}</div>
+                        <div>{{ comment.create_date|datetime }}</div>
+                    </div>
+                    <div class="mx-3">{{ comment.content|markdown }}</div>
                 </div>
-                <div class="mx-3">{{ comment.content|markdown }}</div>
+                {% if g.user == comment.user %}
+                <a class="btn btn-sm" href="{{ url_for('comment.delete', comment_id=comment.id) }}">
+                    <i class="bi bi-x-lg" style="color: #ff0000;"></i>
+                </a>
+                {% endif %}
             </div>
             {% endfor %}
             <div id="comment_block_{{ answer.id }}" class="comment-block" style="display: none;">
