@@ -88,24 +88,3 @@ def vote(answer_id):
         db.session.commit()
 
     return redirect(url_for('question.detail', question_id=answer.question.id))
-
-
-@bp.route('/comment/<int:answer_id>', methods=['POST'])
-@login_required
-def create_comment(answer_id):
-    form = CommentForm()
-    answer = Answer.query.get_or_404(answer_id)
-
-    if form.validate_on_submit():
-        comment = Comment(answer=answer, user=g.user, content=request.form['content'], create_date=datetime.now())
-
-        db.session.add(comment)
-        db.session.commit()
-
-        return redirect(url_for('question.detail', question_id=answer.question.id))
-
-    answer_list = Answer.query.filter(Answer.question_id == answer.question.id) \
-        .order_by(Answer.num_voter.desc(), Answer.create_date.desc()) \
-        .paginate(page=1, per_page=5)
-
-    return render_template('question/question_detail.html', question=answer.question, answer_list=answer_list, form=form, sort=0)

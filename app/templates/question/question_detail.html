@@ -91,7 +91,7 @@
             </div>
             {% endfor %}
             <div id="comment_block_{{ answer.id }}" class="comment-block" style="display: none;">
-                <form method="post" action="{{ url_for('answer.create_comment', answer_id=answer.id) }}">
+                <form method="post" action="{{ url_for('comment.create', answer_id=answer.id) }}">
                     {{ form.csrf_token }}
                     <textarea {% if not g.user %}disabled{% endif %} class="form-control" name="content" rows="3" style="font-size: 0.9em;"></textarea>
                     <input type="submit" value="작성" class="btn btn-sm btn-primary mx-1 my-3">
