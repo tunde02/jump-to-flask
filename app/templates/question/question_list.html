@@ -2,10 +2,18 @@
 {% block content %}
 <div class="container my-3">
     <div class="row my-3">
-        <div class="col-6">
+        <div class="col-4">
             <a href="{{ url_for('question.create') }}" class="btn btn-primary">질문 등록하기</a>
         </div>
-        <div class="col-6">
+        <div class="col-4">
+            <div class="btn-group">
+                <a data-category="all" class="btn btn-outline-primary active" href="javascript:void(0)">전체</a>
+                <a data-category="notice" class="btn btn-outline-primary" href="javascript:void(0)">공지</a>
+                <a data-category="free" class="btn btn-outline-primary" href="javascript:void(0)">자유</a>
+                <a data-category="question" class="btn btn-outline-primary" href="javascript:void(0)">질문</a>
+            </div>
+        </div>
+        <div class="col-4">
             <div class="input-group">
                 <input type="text" id="search_kw" class="form-control" value="{{ kw or '' }}">
                 <div class="input-group-append">
@@ -18,6 +26,7 @@
         <thead>
         <tr class="text-center table-dark">
             <th>번호</th>
+            <th>카테고리</th>
             <th style="width: 50%">제목</th>
             <th>글쓴이</th>
             <th>작성일시</th>
@@ -28,6 +37,7 @@
         {% for question in question_list.items %}
         <tr class="text-center">
             <td>{{ question_list.total - ((question_list.page - 1) * question_list.per_page) - loop.index0 }}</td>
+            <td>{{ question.category.category_text }}</td>
             <td class="text-start">
                 <a href="{{ url_for('question.detail', question_id=question.id) }}">{{ question.subject }}</a>
                 {% if question.answer_set|length > 0 %}
@@ -40,7 +50,7 @@
         {% endfor %}
         {% else %}
         <tr>
-            <td colspan="3">질문이 없습니다.</td>
+            <td colspan="5">질문이 없습니다.</td>
         </tr>
         {% endif %}
         </tbody>

@@ -2,12 +2,25 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, url_for, g, flash
 from werkzeug.utils import redirect
 from app import db
-from app.models import Question, Answer, User
+from app.models import Question, Answer, User, Category
 from app.forms import QuestionForm, AnswerForm
 from app.views.auth_views import login_required
 
 
 bp = Blueprint('question', __name__, url_prefix='/question')
+
+
+def get_category_text(category_type='FREE'):
+    category_text = '자유'
+
+    if category_type == 'FREE': # 자유
+        category_text = '자유'
+    elif category_type == 'QUESTION': # 질문
+        category_text = '질문'
+    elif category_type == 'NOTICE': # 공지
+        category_text = '공지'
+
+    return category_text
 
 
 @bp.route('/list')
@@ -60,8 +73,12 @@ def detail(question_id):
 @login_required
 def create():
     form = QuestionForm()
+
     if request.method == 'POST' and form.validate_on_submit():
         question = Question(subject=form.subject.data, content=form.content.data, create_date=datetime.now(), user=g.user)
+        category_type = form.category_type.data
+        category_text = get_category_text(category_type)
+        question.category = Category(question=question, category_type=category_type, category_text=category_text)
 
         db.session.add(question)
         db.session.commit()
@@ -87,12 +104,14 @@ def modify(question_id):
         if form.validate_on_submit():
             form.populate_obj(question)
             question.modify_date = datetime.now()
+            question.category.category_type = form.category_type.data
+            question.category.category_text = get_category_text(question.category.category_type)
 
             db.session.commit()
 
             return redirect(url_for('question.detail', question_id=question_id))
     else: # GET
-        form = QuestionForm(obj=question)
+        form = QuestionForm(obj=question, category_type=question.category.category_type)
 
     return render_template('question/question_form.html', form=form)
 

@@ -15,11 +15,14 @@ class Question(db.Model):
     create_date = db.Column(db.DateTime(), nullable=False)
     user_id     = db.Column(db.Integer,
         db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    user        = db.relationship('User', backref=db.backref('question_set', passive_deletes=True))
+    user        = db.relationship('User',
+        backref=db.backref('question_set', passive_deletes=True))
     modify_date = db.Column(db.DateTime(), nullable=True)
     voter       = db.relationship('User', secondary=question_voter,
         backref=db.backref('question_voter_set', passive_deletes=True))
     num_voter   = db.Column(db.Integer, nullable=False, default=0)
+    category = db.relationship('Category',
+        back_populates='question', passive_deletes=True, uselist=False)
 
 
 answer_voter = db.Table(
@@ -31,13 +34,16 @@ answer_voter = db.Table(
 
 class Answer(db.Model):
     id          = db.Column(db.Integer, primary_key=True)
-    question_id = db.Column(db.Integer, db.ForeignKey('question.id', ondelete='CASCADE'))
-    question    = db.relationship('Question', backref=db.backref('answer_set', passive_deletes=True))
+    question_id = db.Column(db.Integer,
+        db.ForeignKey('question.id', ondelete='CASCADE'))
+    question    = db.relationship('Question',
+        backref=db.backref('answer_set', passive_deletes=True))
     content     = db.Column(db.Text(), nullable=False)
     create_date = db.Column(db.DateTime(), nullable=False)
     user_id     = db.Column(db.Integer,
         db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    user        = db.relationship('User', backref=db.backref('answer_set'))
+    user        = db.relationship('User',
+        backref=db.backref('answer_set'))
     modify_date = db.Column(db.DateTime(), nullable=True)
     voter       = db.relationship('User', secondary=answer_voter,
         backref=db.backref('answer_voter_set', passive_deletes=True))
@@ -58,7 +64,19 @@ class Comment(db.Model):
     modify_date = db.Column(db.DateTime(), nullable=True)
     answer_id   = db.Column(db.Integer,
         db.ForeignKey('answer.id', ondelete='CASCADE'), nullable=False)
-    answer      = db.relationship('Answer', backref=db.backref('comment_set', passive_deletes=True))
+    answer      = db.relationship('Answer',
+        backref=db.backref('comment_set', passive_deletes=True))
     user_id     = db.Column(db.Integer,
         db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    user        = db.relationship('User', backref=db.backref('comment_set', passive_deletes=True))
+    user        = db.relationship('User',
+        backref=db.backref('comment_set', passive_deletes=True))
+
+
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question_id = db.Column(db.Integer,
+        db.ForeignKey('question.id', ondelete='CASCADE'), nullable=False)
+    question = db.relationship('Question',
+        back_populates='category', passive_deletes=True, uselist=False)
+    category_type = db.Column(db.String(20), nullable=False, server_default='FREE')
+    category_text = db.Column(db.String(20), nullable=False, server_default='자유')

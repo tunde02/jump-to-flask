@@ -12,6 +12,14 @@
                 value="{{ form.subject.data or '' }}">
         </div>
         <div class="mb-3">
+            <label for="category">카테고리</label>
+            <select class="form-select" name="category_type" id="category_type">
+                <option value="NOTICE" {% if form.category_type.data == "NOTICE" %}selected{% endif %}>공지</option>
+                <option value="FREE" {% if form.category_type.data == "FREE" %}selected{% endif %}>자유</option>
+                <option value="QUESTION" {% if form.category_type.data == "QUESTION" %}selected{% endif %}>질문</option>
+            </select>
+        </div>
+        <div class="mb-3">
             <label for="content">내용</label>
             <textarea class="form-control" name="content" id="content" rows="10">{{ form.content.data or '' }}</textarea>
         </div>

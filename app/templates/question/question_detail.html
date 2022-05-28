@@ -3,7 +3,7 @@
 <div class="container my-3">
     {% include 'form_errors.html' %}
     <!-- 질문 -->
-    <h2 class="border-bottom py-2">{{ question.subject }}</h2>
+    <h2 class="border-bottom py-2">[{{ question.category.category_text }}] {{ question.subject }}</h2>
     <div class="card my-3">
         <div class="card-body">
             <div class="card-text">{{ question.content|markdown }}</div>
