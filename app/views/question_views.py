@@ -25,10 +25,16 @@ def get_category_text(category_type='FREE'):
 
 @bp.route('/list')
 def _list():
-    page = request.args.get('page', type=int, default=1)
     kw = request.args.get('kw', type=str, default='')
-    question_list = Question.query.order_by(Question.create_date.desc())
+    page = request.args.get('page', type=int, default=1)
+    category_type = request.args.get('category', type=str, default='')
 
+    # Category
+    question_list = Question.query.join(Category) \
+        .filter(Category.category_type == category_type if category_type else True) \
+        .order_by(Question.create_date.desc())
+
+    # Search
     if kw:
         search = '%%{}%%'.format(kw)
         subquery = db.session.query(Answer.question_id, Answer.content, User.username) \
@@ -46,7 +52,7 @@ def _list():
 
     question_list = question_list.paginate(page, per_page=10)
 
-    return render_template('question/question_list.html', question_list=question_list, page=page, kw=kw)
+    return render_template('question/question_list.html', question_list=question_list, page=page, kw=kw, category=category_type)
 
 
 @bp.route('/detail/<int:question_id>')

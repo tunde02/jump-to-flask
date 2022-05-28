@@ -204,7 +204,6 @@ Array.from(answer_sort_btn_elements).forEach(function(element) {
     element.addEventListener('click', function() {
         document.getElementById('sort').value = this.dataset.sort;
         document.getElementById('page').value = 1;
-        console.log(document.getElementById('sort').value)
         document.getElementById('searchForm').submit();
     });
 });
