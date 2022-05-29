@@ -1,11 +1,12 @@
 import functools
 
 from flask import Blueprint, url_for, render_template, flash, request, session, g
+from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import redirect
 
-from app import db
-from app.forms import UserCreateForm, UserLoginForm
+from app import db, mail
+from app.forms import FindIdForm, UserCreateForm, UserLoginForm
 from app.models import User
 
 
@@ -92,3 +93,23 @@ def logout():
     session.clear()
 
     return redirect(url_for('main.index'))
+
+
+@bp.route('/findid', methods=['GET', 'POST'])
+def find_id():
+    form = FindIdForm()
+
+    if request.method == 'POST' and form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+
+        if not user:
+            flash('존재하지 않는 이메일입니다.')
+        else:
+            message = Message('Pybo 아이디 찾기 메일', sender='snskrktja@naver.com', recipients=[user.email])
+            message.body = '회원님의 아이디는\n\n{0}\n\n입니다.'.format(user.username)
+
+            mail.send(message)
+
+            return render_template('auth/email_sended.html')
+
+    return render_template('auth/find_id.html', form=form)

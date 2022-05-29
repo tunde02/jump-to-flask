@@ -5,3 +5,4 @@ migration/__pycache__
 pybo.db
 *.pyc
 migrations
+config.py

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h5 class="border-bottom my-3 pb-2">아이디 찾기</h5>
+    <form method="post">
+        {{ form.csrf_token }}
+        {% include 'form_errors.html' %}
+        <div class="mb-3">
+            <label for="email">이메일</label>
+            <input type="text" class="form-control" name="email" id="email" value="{{ form.email.data or '' }}">
+        </div>
+        <button type="submit" class="btn btn-primary">제출</button>
+    </form>
+</div>
+{% endblock %}

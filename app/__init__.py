@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import MetaData
+from flask_mail import Mail
 from flaskext.markdown import Markdown
 from pymysql import install_as_MySQLdb
 
@@ -12,6 +12,7 @@ install_as_MySQLdb()
 
 db = SQLAlchemy()
 migrate = Migrate()
+mail = Mail()
 
 
 def create_app():
@@ -40,5 +41,8 @@ def create_app():
 
     # Markdown
     Markdown(app, extensions=['nl2br', 'fenced_code'])
+
+    # Mail
+    mail.init_app(app)
 
     return app
