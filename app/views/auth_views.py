@@ -104,13 +104,15 @@ def find_id():
     form = FindIdForm()
 
     if request.method == 'POST' and form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data).all()
 
         if not user:
             flash('존재하지 않는 이메일입니다.')
         else:
-            message = Message('Pybo 아이디 찾기 메일', recipients=[user.email])
-            message.body = '회원님의 아이디는\n\n{0}\n\n입니다.'.format(user.username)
+            user_email = user[0].email
+            username_list = [u.username for u in user]
+            message = Message('Pybo 아이디 찾기 메일', recipients=[user_email])
+            message.body = '회원님의 아이디 목록 :\n\n{0}'.format('\n'.join(username_list))
 
             mail.send(message)
 
