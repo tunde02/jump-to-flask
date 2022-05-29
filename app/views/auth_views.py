@@ -1,13 +1,15 @@
 import functools
 
 from flask import Blueprint, url_for, render_template, flash, request, session, g
-from flask_mail import Mail, Message
+from flask_mail import Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import redirect
 
 from app import db, mail
-from app.forms import FindIdForm, UserCreateForm, UserLoginForm
+from app.forms import ChangePasswordForm, FindIdForm, FindPasswordForm, UserCreateForm, UserLoginForm
 from app.models import User
+
+from config import SHOULD_CHANGED_PASSWORD
 
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -62,6 +64,8 @@ def login():
             error = "존재하지 않는 사용자입니다."
         elif not check_password_hash(user.password, form.password.data):
             error = "비밀번호가 올바르지 않습니다."
+        elif check_password_hash(user.password, SHOULD_CHANGED_PASSWORD):
+            return redirect(url_for('auth.change_password', user_id=user.id))
 
         if error is None:
             session.clear()
@@ -105,11 +109,52 @@ def find_id():
         if not user:
             flash('존재하지 않는 이메일입니다.')
         else:
-            message = Message('Pybo 아이디 찾기 메일', sender='snskrktja@naver.com', recipients=[user.email])
+            message = Message('Pybo 아이디 찾기 메일', recipients=[user.email])
             message.body = '회원님의 아이디는\n\n{0}\n\n입니다.'.format(user.username)
 
             mail.send(message)
 
             return render_template('auth/email_sended.html')
 
-    return render_template('auth/find_id.html', form=form)
+    return render_template('auth/find_form.html', form=form, find_mode='id')
+
+
+@bp.route('/findpassword', methods=['GET', 'POST'])
+def find_password():
+    form = FindPasswordForm()
+
+    if request.method == 'POST' and form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data, email=form.email.data).first()
+
+        if not user:
+            flash('존재하지 않는 아이디 혹은 이메일입니다.')
+        else:
+            user.password = generate_password_hash(SHOULD_CHANGED_PASSWORD)
+
+            db.session.commit()
+
+            message = Message('Pybo 비밀번호 초기화 메일', recipients=[user.email])
+            message.body = '회원님의 비밀번호가 초기화되었습니다.\n임시 비밀번호\n\n{0}\n\n를 이용해 로그인하여 새로운 비밀번호를 설정해주세요.'.format(SHOULD_CHANGED_PASSWORD)
+
+            mail.send(message)
+
+            return render_template('auth/email_sended.html')
+
+    return render_template('auth/find_form.html', form=form, find_mode='password')
+
+
+@bp.route('/changepassword/<int:user_id>', methods=['GET', 'POST'])
+def change_password(user_id):
+    form = ChangePasswordForm()
+
+    if request.method == 'POST' and form.validate_on_submit:
+        user = User.query.get_or_404(user_id)
+        user.password = generate_password_hash(form.password1.data)
+
+        db.session.commit()
+
+        flash('비밀번호가 변경되었습니다.\n새로운 비밀번호로 로그인해주세요.')
+
+        return redirect(url_for('auth.login'))
+
+    return render_template('auth/change_password.html', form=form)
