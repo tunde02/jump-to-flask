@@ -1,0 +1,98 @@
+{% extends 'auth/profile_base.html' %}
+{% block profile_content %}
+<!-- 내가 쓴 답변 -->
+<div>
+    <h5 class="border-bottom p-2">내가 쓴 답변</h5>
+    <table class="table">
+        <thead>
+        <tr class="text-center table-dark">
+            <th>번호</th>
+            <th>카테고리</th>
+            <th style="width: 50%">질문</th>
+            <th>추천</th>
+            <th>작성일</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if user_answer_list and (user_answer_list.items|length > 0) %}
+        {% for answer in user_answer_list.items %}
+        <tr class="text-center">
+            <td>{{ user_answer_list.total - ((user_answer_list.page - 1) * user_answer_list.per_page) - loop.index0 }}</td>
+            <td>{{ answer.question.category.category_text }}</td>
+            <td class="text-start">
+                <a href="{{ url_for('question.detail', question_id=answer.question.id, _anchor='answer_%s' % answer.id) }}">{{ answer.question.subject }}</a>
+                {% if answer.question.answer_set|length > 0 %}
+                <span class="text-danger small mx-2">{{ answer.question.answer_set|length }}</span>
+                {% endif %}
+            </td>
+            <td>{{ answer.num_voter }}</td>
+            <td>{{ answer.create_date|datetime }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr class="text-center">
+            <td colspan="12">작성한 답변이 없습니다.</td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+
+    <!-- 페이징 처리 Start -->
+    <ul class="pagination justify-content-end">
+        <!-- 이전 페이지 -->
+        {% if user_answer_list.has_prev %}
+        <li class="page-item">
+            <a class="page-link" data-page="{{ user_answer_list.prev_num }}" href="javascript:select_page({{ user_answer_list.prev_num }})">이전</a>
+        </li>
+        {% endif %}
+
+        <!-- 페이지 목록 -->
+        {% for page_num in user_answer_list.iter_pages() %}
+        {% if page_num %}
+        {% if page_num != user_answer_list.page %}
+        <li class="page-item">
+            <a class="page-link" data-page="{{ page_num }}" href="javascript:select_page({{ page_num }})">{{ page_num }}</a>
+        </li>
+        {% else %}
+        <!-- 현재 페이지 링크 비활성화 -->
+        <li class="page-item active" aria-current="page">
+            <a href="javascript:void(0)" class="page-link" style="pointer-events: none;">{{ page_num }}</a>
+        </li>
+        {% endif %}
+        {% else%}
+        <li class="disabled">
+            <a href="javascript:void(0)" class="page-link">...</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+
+        <!-- 다음 페이지 -->
+        {% if user_answer_list.has_next %}
+        <li class="page-item">
+            <a class="page-link" data-page="{{ user_answer_list.next_num }}" href="javascript:void(0)">다음</a>
+        </li>
+        {% endif %}
+    </ul>
+    <!-- 페이징 처리 End -->
+</div>
+{% block form %}
+<form id="answerListForm" method="get" action="{{ url_for('auth.profile', username=g.user.username) }}">
+    <input type="hidden" name="tab" id="tab" value="{{ tab }}">
+    <input type="hidden" name="page" id="page" value="{{ page }}">
+</form>
+{% endblock %}
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+function select_tab(tab) {
+    document.getElementById("base_tab_input").value = tab;
+    document.getElementById("baseForm").submit()
+}
+
+function select_page(page) {
+    document.getElementById("page").value = page;
+    document.getElementById("answerListForm").submit();
+}
+</script>
+{% endblock %}

@@ -55,6 +55,7 @@ class User(db.Model):
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     email    = db.Column(db.String(120), nullable=False)
+    profile_image = db.Column(db.String(200), nullable=False, default='images/default_profile.png')
 
 
 class Comment(db.Model):
@@ -78,5 +79,5 @@ class Category(db.Model):
         db.ForeignKey('question.id', ondelete='CASCADE'), nullable=False)
     question = db.relationship('Question',
         back_populates='category', passive_deletes=True, uselist=False)
-    category_type = db.Column(db.String(20), nullable=False, server_default='FREE')
-    category_text = db.Column(db.String(20), nullable=False, server_default='자유')
+    category_type = db.Column(db.String(20), nullable=False, default='FREE')
+    category_text = db.Column(db.String(20), nullable=False, default='자유')

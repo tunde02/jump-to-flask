@@ -1,0 +1,8 @@
+{% extends 'auth/profile_base.html' %}
+{% block profile_content %}
+<!-- 이메일 -->
+<div class="mb-3">
+    <h4 class="border-bottom p-2">이메일</h4>
+    <span class="p-2" style="font-size: 1.2em;">{{ g.user.email }}</span>
+</div>
+{% endblock %}

@@ -7,7 +7,7 @@ from werkzeug.utils import redirect
 
 from app import db, mail
 from app.forms import ChangePasswordForm, FindIdForm, FindPasswordForm, UserCreateForm, UserLoginForm
-from app.models import User
+from app.models import User, Question, Answer
 
 from config import SHOULD_CHANGED_PASSWORD
 
@@ -160,3 +160,24 @@ def change_password(user_id):
         return redirect(url_for('auth.login'))
 
     return render_template('auth/change_password.html', form=form)
+
+
+@bp.route('/profile/<string:username>')
+@login_required
+def profile(username):
+    user = User.query.filter_by(username=username).first()
+    tab = request.args.get('tab', type=str, default='info')
+    page = request.args.get('page', type=int, default=1)
+
+    if tab == 'info':
+        return render_template('auth/profile_info.html', tab=tab)
+    elif tab == 'question_list':
+        user_question_list = Question.query.filter_by(user_id=user.id).order_by(Question.num_voter.desc(), Question.create_date.desc()).paginate(page, per_page=10)
+
+        return render_template('auth/profile_question_list.html', tab=tab, user_question_list=user_question_list)
+    elif tab == 'answer_list':
+        user_answer_list = Answer.query.filter_by(user_id=user.id).order_by(Answer.num_voter.desc(), Answer.create_date.desc()).paginate(page, per_page=10)
+
+        return render_template('auth/profile_answer_list.html', tab=tab, user_answer_list=user_answer_list)
+
+    return render_template('auth/profile_info.html', tab=tab)
