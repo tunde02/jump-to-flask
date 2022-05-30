@@ -6,3 +6,4 @@ pybo.db
 *.pyc
 migrations
 config.py
+app/static/images
