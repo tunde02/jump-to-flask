@@ -2,10 +2,10 @@
 {% block content %}
 <div class="container my-3">
     <div class="row my-3">
-        <div class="col-4">
-            <a href="{{ url_for('question.create') }}" class="btn btn-primary">질문 등록하기</a>
+        <div class="col-3">
+            <a href="{{ url_for('question.create') }}" class="btn btn-primary">글쓰기</a>
         </div>
-        <div class="col-4">
+        <div class="col-3">
             <div class="btn-group">
                 <a data-category="" class="category-btn btn btn-outline-primary {{ 'active' if not category }}" href="javascript:void(0)">전체</a>
                 <a data-category="NOTICE" class="category-btn btn btn-outline-primary {{ 'active' if category == 'NOTICE' }}" href="javascript:void(0)">공지</a>
@@ -13,7 +13,14 @@
                 <a data-category="QUESTION" class="category-btn btn btn-outline-primary {{ 'active' if category == 'QUESTION' }}" href="javascript:void(0)">질문</a>
             </div>
         </div>
-        <div class="col-4">
+        <div class="col-3">
+            <div class="btn-group">
+                <a data-per_page="10" class="per_page-btn btn btn-outline-primary {{ 'active' if per_page == 10 }}" href="javascript:void(0)">10개</a>
+                <a data-per_page="20" class="per_page-btn btn btn-outline-primary {{ 'active' if per_page == 20 }}" href="javascript:void(0)">20개</a>
+                <a data-per_page="30" class="per_page-btn btn btn-outline-primary {{ 'active' if per_page == 30 }}" href="javascript:void(0)">30개</a>
+            </div>
+        </div>
+        <div class="col-3">
             <div class="input-group">
                 <input type="text" id="search_kw" class="form-control" value="{{ kw or '' }}">
                 <div class="input-group-append">
@@ -29,14 +36,16 @@
             <th>카테고리</th>
             <th style="width: 50%">제목</th>
             <th>글쓴이</th>
-            <th>작성일시</th>
+            <th>추천</th>
+            <th>작성일</th>
         </tr>
         </thead>
         <tbody>
         {% if question_list %}
         {% for question in question_list.items %}
         <tr class="text-center">
-            <td>{{ question_list.total - ((question_list.page - 1) * question_list.per_page) - loop.index0 }}</td>
+            <!-- <td>{{ question_list.total - ((question_list.page - 1) * question_list.per_page) - loop.index0 }}</td> -->
+            <td>{{ question.id }}</td>
             <td>{{ question.category.category_text }}</td>
             <td class="text-start">
                 <a href="{{ url_for('question.detail', question_id=question.id) }}">{{ question.subject }}</a>
@@ -45,6 +54,7 @@
                 {% endif %}
             </td>
             <td>{{ question.user.username }}</td>
+            <td>{{ question.num_voter }}</td>
             <td>{{ question.create_date|datetime }}</td>
         </tr>
         {% endfor %}
@@ -105,6 +115,7 @@
 <form id="searchForm" method="get" action="{{ url_for('question._list') }}">
     <input type="hidden" id="kw" name="kw" value="{{ kw or '' }}">
     <input type="hidden" id="page" name="page" value="{{ page }}">
+    <input type="hidden" id="per_page" name="per_page" value="{{ per_page }}">
     <input type="hidden" id="category" name="category" value="{{ category }}">
 </form>
 {% endblock %}
@@ -131,6 +142,15 @@ Array.from(category_elements).forEach(function(element) {
     element.addEventListener('click', function() {
         document.getElementById('category').value = this.dataset.category;
         document.getElementById('page').value = 1; // 카테고리 버튼을 클릭할 경우 1페이지부터 조회
+        document.getElementById('searchForm').submit();
+    });
+});
+
+const per_page_elements = document.getElementsByClassName("per_page-btn");
+Array.from(per_page_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        document.getElementById('page').value = 1; // 카테고리 버튼을 클릭할 경우 1페이지부터 조회
+        document.getElementById('per_page').value = this.dataset.per_page;
         document.getElementById('searchForm').submit();
     });
 });

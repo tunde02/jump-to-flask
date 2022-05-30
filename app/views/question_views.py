@@ -27,6 +27,7 @@ def get_category_text(category_type='FREE'):
 def _list():
     kw = request.args.get('kw', type=str, default='')
     page = request.args.get('page', type=int, default=1)
+    per_page = request.args.get('per_page', type=int, default=10)
     category_type = request.args.get('category', type=str, default='')
 
     # Category
@@ -50,9 +51,9 @@ def _list():
                     ) \
             .distinct()
 
-    question_list = question_list.paginate(page, per_page=10)
+    question_list = question_list.paginate(page, per_page=per_page)
 
-    return render_template('question/question_list.html', question_list=question_list, page=page, kw=kw, category=category_type)
+    return render_template('question/question_list.html', question_list=question_list, page=page, per_page=per_page, kw=kw, category=category_type)
 
 
 @bp.route('/detail/<int:question_id>')
@@ -81,7 +82,8 @@ def create():
     form = QuestionForm()
 
     if request.method == 'POST' and form.validate_on_submit():
-        question = Question(subject=form.subject.data, content=form.content.data, create_date=datetime.now(), user=g.user)
+        content = form.content.data if form.content.data else 'ㅈㄱㄴ'
+        question = Question(subject=form.subject.data, content=content, create_date=datetime.now(), user=g.user)
         category_type = form.category_type.data
         category_text = get_category_text(category_type)
         question.category = Category(question=question, category_type=category_type, category_text=category_text)
@@ -108,6 +110,7 @@ def modify(question_id):
         form = QuestionForm()
 
         if form.validate_on_submit():
+            form.content.data = form.content.data if form.content.data else 'ㅈㄱㄴ'
             form.populate_obj(question)
             question.modify_date = datetime.now()
             question.category.category_type = form.category_type.data
@@ -143,10 +146,11 @@ def delete(question_id):
 def vote(question_id):
     question = Question.query.get_or_404(question_id)
 
-    if g.user == question.user:
-        flash("본인이 작성한 글은 추천할 수 없습니다.")
+    if g.user in question.voter:
+        flash("이미 추천한 글입니다.")
     else:
         question.voter.append(g.user) # 동일한 사용자가 여러 번 추천해도 내부적으로 중복되지 않게끔 처리됨
+        question.num_voter += 1
 
         db.session.commit()
 
