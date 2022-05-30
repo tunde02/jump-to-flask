@@ -9,3 +9,7 @@
 .card {
     border: 2px solid #dddddd;
 }
+
+.font-weight-bold {
+    font-weight: bold;
+}
