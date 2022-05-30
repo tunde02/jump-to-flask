@@ -20,11 +20,24 @@
                 </div>
             </div>
             <div class="my-3">
-                <a href="javascript:void(0)" data-uri="{{ url_for('question.vote', question_id=question.id) }}"
-                    class="recommend btn btn-sm btn-outline-primary">
+                {% if g.user %}
+                {% if not (g.user in question.voter) %}
+                <a href="{{ url_for('question.vote', question_id=question.id) }}" class="btn btn-sm btn-outline-primary">
                     추천
                     <span class="badge rounded-pill bg-success">{{ question.voter|length }}</span>
                 </a>
+                {% else %}
+                <a href="javascript:void(0)" class="already-recommended btn btn-sm btn-outline-primary">
+                    추천
+                    <span class="badge rounded-pill bg-success">{{ question.voter|length }}</span>
+                </a>
+                {% endif %}
+                {% else %}
+                <a href="javascript:void(0)" aria-disabled="true" class="btn btn-sm btn-outline-primary disabled">
+                    추천
+                    <span class="badge rounded-pill bg-success">{{ question.voter|length }}</span>
+                </a>
+                {% endif %}
                 {% if g.user == question.user %}
                 <a href="{{ url_for('question.modify', question_id=question.id) }}"
                     class="btn btn-sm btn-outline-primary">수정</a>
@@ -45,6 +58,7 @@
         </div>
     </div>
     {% for answer in answer_list.items %}
+    <a id="answer_{{ answer.id }}"></a>
     <div class="card my-3">
         <div class="card-body">
             <div class="card-text d-flex justify-content-between">
@@ -69,10 +83,17 @@
                     댓글
                     <span class="badge rounded-pill bg-success">{{ answer.comment_set|length }}</span>
                 </a>
-                <a href="javascript:void(0)" data-uri="{{ url_for('answer.vote', answer_id=answer.id) }}" class="recommend btn btn-sm btn-outline-primary">
+                {% if not (g.user in answer.voter) %}
+                <a href="{{ url_for('answer.vote', answer_id=answer.id) }}" class="btn btn-sm btn-outline-primary">
                     추천
                     <span class="badge rounded-pill bg-success">{{ answer.num_voter }}</span>
                 </a>
+                {% else %}
+                <a href="javascript:void(0)" class="already-recommended btn btn-sm btn-outline-primary">
+                    추천
+                    <span class="badge rounded-pill bg-success">{{ answer.num_voter }}</span>
+                </a>
+                {% endif %}
                 {% if g.user == answer.user %}
                 <a href="{{ url_for('answer.modify', answer_id=answer.id) }}" class="btn btn-sm btn-outline-primary">수정</a>
                 <a href="javascript:void(0)" data-uri="{{ url_for('answer.delete', answer_id=answer.id) }}" class="delete btn btn-sm btn-danger">삭제</a>
@@ -182,12 +203,10 @@ Array.from(delete_elements).forEach(function(element) {
     });
 });
 
-const recommend_elements = document.getElementsByClassName("recommend");
-Array.from(recommend_elements).forEach(function(element) {
+const already_recommended_elements = document.getElementsByClassName("already-recommended");
+Array.from(already_recommended_elements).forEach(function(element) {
     element.addEventListener('click', function() {
-        if (confirm("정말로 추천하시겠습니까?")) {
-            location.href = this.dataset.uri;
-        }
+        confirm("중복 추천은 불가능합니다.")
     });
 });
 

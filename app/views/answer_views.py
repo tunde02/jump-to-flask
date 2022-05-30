@@ -22,7 +22,7 @@ def create(question_id):
         db.session.add(answer)
         db.session.commit()
 
-        return redirect(url_for('question.detail', question_id=question_id))
+        return redirect(url_for('question.detail', question_id=question_id, _anchor=f'answer_{answer.id}'))
 
     answer_list = Answer.query.filter(Answer.question_id == question_id) \
         .order_by(Answer.num_voter.desc(), Answer.create_date.desc()) \
@@ -50,7 +50,7 @@ def modify(answer_id):
 
             db.session.commit()
 
-            return redirect(url_for('question.detail', question_id=answer.question.id))
+            return redirect(url_for('question.detail', question_id=answer.question_id, _anchor=f'answer_{answer.id}'))
     else: # GET
         form = AnswerForm(obj=answer)
 
@@ -77,9 +77,7 @@ def delete(answer_id):
 def vote(answer_id):
     answer = Answer.query.get_or_404(answer_id)
 
-    if g.user == answer.user:
-        flash("본인이 작성한 글은 추천할 수 없습니다.")
-    elif g.user in answer.voter:
+    if g.user in answer.voter:
         flash("이미 추천한 글입니다.")
     else:
         answer.voter.append(g.user)
