@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container">
     <div class="row">
-        <div class="col-md-3 border d-flex flex-column">
+        <div class="col-md-3 border d-flex flex-column p-3">
             <div>
                 <img src="{{ url_for('static', filename=g.user.profile_image) }}" alt="{{ url_for('static', filename='images/default_profile.png') }}" class="rounded img-thumbnail" width="300">
             </div>
@@ -15,7 +15,7 @@
                 <a href="javascript:select_tab('answer_list')" class="btn btn-outline-secondary mb-2 {{ 'active' if tab == 'answer_list' }}">내가 쓴 답변</a>
             </div>
         </div>
-        <div class="col-md-9 border">
+        <div class="col-md-9 border p-3">
             {% block profile_content %}
             {% endblock %}
         </div>
