@@ -21,8 +21,9 @@ class Question(db.Model):
     voter       = db.relationship('User', secondary=question_voter,
         backref=db.backref('question_voter_set', passive_deletes=True))
     num_voter   = db.Column(db.Integer, nullable=False, default=0)
-    category = db.relationship('Category',
+    category    = db.relationship('Category',
         back_populates='question', passive_deletes=True, uselist=False)
+    num_views   = db.Column(db.Integer, nullable=False, default=0)
 
 
 answer_voter = db.Table(

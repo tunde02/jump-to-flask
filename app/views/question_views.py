@@ -106,6 +106,9 @@ def detail(question_id):
 
     answer_list = answer_list.paginate(page, per_page=5)
 
+    question.num_views += 1
+    db.session.commit()
+
     return render_template('question/question_detail.html', question=question, answer_list=answer_list, form=form, sort=sort)
 
 

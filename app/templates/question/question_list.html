@@ -36,8 +36,9 @@
             <th>카테고리</th>
             <th style="width: 50%">제목</th>
             <th>글쓴이</th>
-            <th>추천</th>
             <th>작성일</th>
+            <th>조회수</th>
+            <th>추천</th>
         </tr>
         </thead>
         <tbody>
@@ -53,8 +54,9 @@
                 {% endif %}
             </td>
             <td>{{ question.user.username }}</td>
-            <td>{{ question.num_voter }}</td>
             <td>{{ question.create_date|datetime }}</td>
+            <td>{{ question.num_views }}</td>
+            <td>{{ question.num_voter }}</td>
         </tr>
         {% endfor %}
         {% else %}
