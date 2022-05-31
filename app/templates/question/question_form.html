@@ -21,9 +21,82 @@
         </div>
         <div class="mb-3">
             <label for="content">내용</label>
-            <textarea class="form-control" name="content" id="content" rows="20" placeholder="ㅈㄱㄴ">{{ form.content.data or '' }}</textarea>
+            <textarea class="form-control" name="content" id="summernote" rows="20" placeholder="ㅈㄱㄴ">{{ form.content.data or '' }}</textarea>
         </div>
         <button type="submit" class="btn btn-primary">저장하기</button>
+        <input type="hidden" name="upload_images" id="upload_images" value="">
     </form>
 </div>
+{% endblock %}
+
+{% block script %}
+<script>
+function uploadImage(file, editor, welEditable) {
+    var data = new FormData();
+    data.append("image", file);
+
+    $.ajax({
+        url: "/question/upload",
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: data,
+        type: "POST",
+        success: function(filename) {
+            var image = $('<img>').attr('src', "{{ url_for('static', filename='images/temp/') }}" + filename).addClass("img-fluid");
+            $('#summernote').summernote("insertNode", image[0]);
+            document.getElementById('upload_images').value += filename + "|";
+        },
+        error: function(data) {
+            console.log(data);
+        }
+    });
+}
+
+var marqueeButton = function(context) {
+    var ui = $.summernote.ui;
+
+    var button = ui.button({
+        contents: '<MARQUEE>움직이는 글자!!</MARQUEE>',
+        tooltip: '움직이는 글자!!',
+        click: function () {
+            context.invoke('editor.pasteHTML', '<MARQUEE>움직이는 글자!!</MARQUEE>');
+        }
+    });
+
+    return button.render();
+}
+
+$(document).ready(function() {
+    $('#summernote').summernote({
+        placeholder: 'ㅈㄱㄴ',
+        height: 600,
+        focus: true,
+        lang: "ko-KR",
+        toolbar: [
+            // [groupName, [list of button]]
+            ['fontname', ['fontname']],
+            ['fontsize', ['fontsize']],
+            ['style', ['bold', 'italic', 'underline','strikethrough', 'clear']],
+            ['color', ['forecolor','color']],
+            ['table', ['table']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['height', ['height']],
+            ['insert',['picture','link','video']],
+            ['view', ['codeview', 'help']],
+            ['mybutton', ['marquee']]
+        ],
+        buttons: {
+            marquee: marqueeButton
+        },
+        fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New','맑은 고딕','궁서','굴림체','굴림','돋움체','바탕체'],
+        fontSizes: ['8','9','10','11','12','14','16','18','20','22','24','28','30','36','50','72'],
+        callbacks: {
+            onImageUpload: function(files, editor, welEditable) {
+                uploadImage(files[0], editor, welEditable);
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

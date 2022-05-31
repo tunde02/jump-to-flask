@@ -1,7 +1,9 @@
+import os, uuid, shutil
+
 from datetime import datetime
 from flask import Blueprint, render_template, request, url_for, g, flash
-from werkzeug.utils import redirect
-from app import db
+from werkzeug.utils import redirect, secure_filename
+from app import db, config
 from app.models import Question, Answer, User, Category
 from app.forms import QuestionForm, AnswerForm
 from app.views.auth_views import login_required
@@ -21,6 +23,37 @@ def get_category_text(category_type='FREE'):
         category_text = '공지'
 
     return category_text
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in config.ALLOWED_EXTENSIONS
+
+
+def save_uploaded_images(request, question_id):
+    # 게시글에 쓰인 이미지 파일 저장
+    uploaded_images_path = os.path.join(config.UPLOAD_FOLDER, 'temp')
+    post_images_path = os.path.join(config.UPLOAD_FOLDER, 'posts', question_id)
+
+    if not os.path.exists(post_images_path):
+        os.makedirs(post_images_path)
+
+    if request.form.get('upload_images'):
+        _filenames = request.form.get('upload_images')[:-1].split('|')
+
+        for filename in _filenames:
+            before = os.path.join(uploaded_images_path, filename)
+            destination = os.path.join(post_images_path, filename)
+            shutil.move(before, destination)
+
+
+def remove_temp_uploaded_images(content, question_id):
+    # 게시글 폴더의 이미지들 중 content에 없는 것 삭제
+    post_images_path = os.path.join(config.UPLOAD_FOLDER, 'posts', question_id)
+
+    for filename in os.listdir(post_images_path):
+        if filename not in content:
+            os.remove(os.path.join(post_images_path, filename))
 
 
 @bp.route('/list')
@@ -82,16 +115,22 @@ def create():
     form = QuestionForm()
 
     if request.method == 'POST' and form.validate_on_submit():
-        content = form.content.data if form.content.data else 'ㅈㄱㄴ'
-        question = Question(subject=form.subject.data, content=content, create_date=datetime.now(), user=g.user)
-        category_type = form.category_type.data
-        category_text = get_category_text(category_type)
-        question.category = Category(question=question, category_type=category_type, category_text=category_text)
+        question = Question(subject=form.subject.data, create_date=datetime.now(), user=g.user)
+
+        question.content = form.content.data if form.content.data else 'ㅈㄱㄴ'
+        question.category = Category(question=question, category_type=form.category_type.data, category_text=get_category_text(form.category_type.data))
 
         db.session.add(question)
         db.session.commit()
 
-        return redirect(url_for('main.index'))
+        # 이미지 불러오는 경로 변경
+        question.content = question.content.replace('/temp/', f"/posts/{question.id}/")
+        db.session.commit()
+
+        save_uploaded_images(request, str(question.id))
+        remove_temp_uploaded_images(form.content.data, str(question.id))
+
+        return redirect(url_for('question.detail', question_id=question.id))
 
     return render_template('question/question_form.html', form=form)
 
@@ -110,11 +149,18 @@ def modify(question_id):
         form = QuestionForm()
 
         if form.validate_on_submit():
-            form.content.data = form.content.data if form.content.data else 'ㅈㄱㄴ'
+            if form.content.data and form.content.data != "<p><br></p>":
+                form.content.data = form.content.data.replace('/temp/', f'/posts/{question.id}/')
+            else:
+                form.content.data = 'ㅈㄱㄴ'
+
             form.populate_obj(question)
             question.modify_date = datetime.now()
             question.category.category_type = form.category_type.data
             question.category.category_text = get_category_text(question.category.category_type)
+
+            save_uploaded_images(request, str(question.id))
+            remove_temp_uploaded_images(form.content.data, str(question.id))
 
             db.session.commit()
 
@@ -134,6 +180,10 @@ def delete(question_id):
         flash("삭제 권한이 없습니다.")
 
         return redirect(url_for('question.detail', question_id=question_id))
+
+    # 게시글에 쓰인 이미지 폴더째로 삭제
+    post_images_path = os.path.join(config.UPLOAD_FOLDER, 'posts', str(question.id))
+    shutil.rmtree(post_images_path)
 
     db.session.delete(question)
     db.session.commit()
@@ -155,3 +205,28 @@ def vote(question_id):
         db.session.commit()
 
     return redirect(url_for('question.detail', question_id=question_id))
+
+
+@bp.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == "POST":
+        file = request.files["image"]
+
+        if file.filename == '':
+            return "error.png"
+
+        if file and allowed_file(file.filename):
+            file_extension = file.filename.rsplit('.', 1)[1].lower()
+            filename = secure_filename(f"{str(uuid.uuid4())}.{file_extension}")
+
+            # 파일 이름 중복을 피하기 위해
+            # 같은 이름이 존재하지 않을 때까지 uudi 새로 생성
+            while os.path.exists(config.UPLOAD_FOLDER + "/" + filename):
+                filename = secure_filename(f"{str(uuid.uuid4())}.{file_extension}")
+
+            temp_path = os.path.join(config.UPLOAD_FOLDER, 'temp')
+            file.save(os.path.join(temp_path, filename))
+
+            return filename
+
+    return "error.png"
