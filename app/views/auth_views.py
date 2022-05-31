@@ -172,11 +172,11 @@ def profile(username):
     if tab == 'info':
         return render_template('auth/profile_info.html', tab=tab)
     elif tab == 'question_list':
-        user_question_list = Question.query.filter_by(user_id=user.id).order_by(Question.num_voter.desc(), Question.create_date.desc()).paginate(page, per_page=10)
+        user_question_list = Question.query.filter_by(user_id=user.id).order_by(Question.create_date.desc()).paginate(page, per_page=10)
 
         return render_template('auth/profile_question_list.html', tab=tab, user_question_list=user_question_list)
     elif tab == 'answer_list':
-        user_answer_list = Answer.query.filter_by(user_id=user.id).order_by(Answer.num_voter.desc(), Answer.create_date.desc()).paginate(page, per_page=10)
+        user_answer_list = Answer.query.filter_by(user_id=user.id).order_by(Answer.create_date.desc()).paginate(page, per_page=10)
 
         return render_template('auth/profile_answer_list.html', tab=tab, user_answer_list=user_answer_list)
 
