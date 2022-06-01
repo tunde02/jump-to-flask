@@ -3,10 +3,12 @@ import os, uuid, shutil
 from datetime import datetime
 from flask import Blueprint, render_template, request, url_for, g, flash
 from werkzeug.utils import redirect, secure_filename
-from app import db, config
+
+from app import db
 from app.models import Question, Answer, User, Category
 from app.forms import QuestionForm, AnswerForm
 from app.views.auth_views import login_required
+from config.development import UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 
 
 bp = Blueprint('question', __name__, url_prefix='/question')
@@ -19,6 +21,12 @@ def get_category_text(category_type='FREE'):
         category_text = '자유'
     elif category_type == 'QUESTION': # 질문
         category_text = '질문'
+    elif category_type == 'INFORMATION': # 정보
+        category_text = '정보'
+    elif category_type == 'BOAST': # 비틱
+        category_text = '비틱'
+    elif category_type == 'SUGGESTION': # 건의
+        category_text = '건의'
     elif category_type == 'NOTICE': # 공지
         category_text = '공지'
 
@@ -27,13 +35,13 @@ def get_category_text(category_type='FREE'):
 
 def allowed_file(filename):
     return '.' in filename and \
-        filename.rsplit('.', 1)[1].lower() in config.ALLOWED_EXTENSIONS
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def save_uploaded_images(request, question_id):
     # 게시글에 쓰인 이미지 파일 저장
-    uploaded_images_path = os.path.join(config.UPLOAD_FOLDER, 'temp')
-    post_images_path = os.path.join(config.UPLOAD_FOLDER, 'posts', question_id)
+    uploaded_images_path = os.path.join(UPLOAD_FOLDER, 'temp')
+    post_images_path = os.path.join(UPLOAD_FOLDER, 'posts', question_id)
 
     if not os.path.exists(post_images_path):
         os.makedirs(post_images_path)
@@ -49,7 +57,7 @@ def save_uploaded_images(request, question_id):
 
 def remove_temp_uploaded_images(content, question_id):
     # 게시글 폴더의 이미지들 중 content에 없는 것 삭제
-    post_images_path = os.path.join(config.UPLOAD_FOLDER, 'posts', question_id)
+    post_images_path = os.path.join(UPLOAD_FOLDER, 'posts', question_id)
 
     for filename in os.listdir(post_images_path):
         if filename not in content:
@@ -185,7 +193,7 @@ def delete(question_id):
         return redirect(url_for('question.detail', question_id=question_id))
 
     # 게시글에 쓰인 이미지 폴더째로 삭제
-    post_images_path = os.path.join(config.UPLOAD_FOLDER, 'posts', str(question.id))
+    post_images_path = os.path.join(UPLOAD_FOLDER, 'posts', str(question.id))
     shutil.rmtree(post_images_path)
 
     db.session.delete(question)
@@ -224,10 +232,10 @@ def upload():
 
             # 파일 이름 중복을 피하기 위해
             # 같은 이름이 존재하지 않을 때까지 uudi 새로 생성
-            while os.path.exists(config.UPLOAD_FOLDER + "/" + filename):
+            while os.path.exists(UPLOAD_FOLDER + "/" + filename):
                 filename = secure_filename(f"{str(uuid.uuid4())}.{file_extension}")
 
-            temp_path = os.path.join(config.UPLOAD_FOLDER, 'temp')
+            temp_path = os.path.join(UPLOAD_FOLDER, 'temp')
             file.save(os.path.join(temp_path, filename))
 
             return filename

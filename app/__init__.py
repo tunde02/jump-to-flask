@@ -5,8 +5,6 @@ from flask_mail import Mail
 from flaskext.markdown import Markdown
 from pymysql import install_as_MySQLdb
 
-import config
-
 
 install_as_MySQLdb()
 
@@ -17,7 +15,7 @@ mail = Mail()
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(config)
+    app.config.from_envvar('APP_CONFIG_FILE')
 
     # ORM
     db.init_app(app)
@@ -36,8 +34,9 @@ def create_app():
     app.register_blueprint(comment_views.bp)
 
     # Filters
-    from app.filter import datetime_format
+    from app.filter import datetime_format, detail_datetime_format
     app.jinja_env.filters['datetime'] = datetime_format
+    app.jinja_env.filters['datetime_detail'] = detail_datetime_format
 
     # Markdown
     Markdown(app, extensions=['nl2br', 'fenced_code'])

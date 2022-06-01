@@ -8,8 +8,7 @@ from werkzeug.utils import redirect
 from app import db, mail
 from app.forms import ChangePasswordForm, FindIdForm, FindPasswordForm, UserCreateForm, UserLoginForm
 from app.models import User, Question, Answer
-
-from config import SHOULD_CHANGED_PASSWORD
+from config.development import SHOULD_CHANGED_PASSWORD
 
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
