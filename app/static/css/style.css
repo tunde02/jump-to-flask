@@ -13,3 +13,8 @@
 .font-weight-bold {
     font-weight: bold;
 }
+
+.a-none-deco {
+    text-decoration: none;
+    color: black;
+}

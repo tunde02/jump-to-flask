@@ -34,9 +34,9 @@ def create_app():
     app.register_blueprint(comment_views.bp)
 
     # Filters
-    from app.filter import datetime_format, detail_datetime_format
+    from app.filter import datetime_format, datetime_detail_format
     app.jinja_env.filters['datetime'] = datetime_format
-    app.jinja_env.filters['datetime_detail'] = detail_datetime_format
+    app.jinja_env.filters['datetime_detail'] = datetime_detail_format
 
     # Markdown
     Markdown(app, extensions=['nl2br', 'fenced_code'])

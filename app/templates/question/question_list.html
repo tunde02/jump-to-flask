@@ -2,30 +2,25 @@
 {% block content %}
 <div class="container my-3">
     <div class="row my-3">
-        <div class="col-3">
+        <div class="col-1">
             <a href="{{ url_for('question.create') }}" class="btn btn-primary">글쓰기</a>
         </div>
-        <div class="col-3">
+        <div class="col-5 d-flex align-items-center">
             <div class="btn-group">
-                <a data-category="" class="category-btn btn btn-outline-primary {{ 'active' if not category }}" href="javascript:void(0)">전체</a>
-                <a data-category="NOTICE" class="category-btn btn btn-outline-primary {{ 'active' if category == 'NOTICE' }}" href="javascript:void(0)">공지</a>
-                <a data-category="FREE" class="category-btn btn btn-outline-primary {{ 'active' if category == 'FREE' }}" href="javascript:void(0)">자유</a>
-                <a data-category="QUESTION" class="category-btn btn btn-outline-primary {{ 'active' if category == 'QUESTION' }}" href="javascript:void(0)">질문</a>
+                <a data-category="" class="category-btn btn btn-sm btn-outline-primary {{ 'active' if not category }}" href="javascript:void(0)">전체</a>
+                <a data-category="NOTICE" class="category-btn btn btn-sm btn-outline-primary {{ 'active' if category == 'NOTICE' }}" href="javascript:void(0)">공지</a>
+                <a data-category="FREE" class="category-btn btn btn-sm btn-outline-primary {{ 'active' if category == 'FREE' }}" href="javascript:void(0)">자유</a>
+                <a data-category="QUESTION" class="category-btn btn btn-sm btn-outline-primary {{ 'active' if category == 'QUESTION' }}" href="javascript:void(0)">질문</a>
+                <a data-category="INFORMATION" class="category-btn btn btn-sm btn-outline-primary {{ 'active' if category == 'INFORMATION' }}" href="javascript:void(0)">정보</a>
+                <a data-category="BOAST" class="category-btn btn btn-sm btn-outline-primary {{ 'active' if category == 'BOAST' }}" href="javascript:void(0)">비틱</a>
+                <a data-category="SUGGESTION" class="category-btn btn btn-sm btn-outline-primary {{ 'active' if category == 'SUGGESTION' }}" href="javascript:void(0)">건의</a>
             </div>
         </div>
-        <div class="col-3">
+        <div class="col-sm">
             <div class="btn-group">
                 <a data-per_page="10" class="per_page-btn btn btn-outline-primary {{ 'active' if per_page == 10 }}" href="javascript:void(0)">10개</a>
                 <a data-per_page="20" class="per_page-btn btn btn-outline-primary {{ 'active' if per_page == 20 }}" href="javascript:void(0)">20개</a>
                 <a data-per_page="30" class="per_page-btn btn btn-outline-primary {{ 'active' if per_page == 30 }}" href="javascript:void(0)">30개</a>
-            </div>
-        </div>
-        <div class="col-3">
-            <div class="input-group">
-                <input type="text" id="search_kw" class="form-control" value="{{ kw or '' }}">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" id="btn_search">찾기</button>
-                </div>
             </div>
         </div>
     </div>
@@ -34,8 +29,8 @@
         <tr class="text-center table-dark">
             <th>번호</th>
             <th>카테고리</th>
-            <th style="width: 50%">제목</th>
-            <th>글쓴이</th>
+            <th class="col-7">제목</th>
+            <th class="col-2">글쓴이</th>
             <th>작성일</th>
             <th>조회수</th>
             <th>추천</th>
@@ -47,13 +42,15 @@
         <tr class="text-center">
             <td>{{ question_list.total - ((question_list.page - 1) * question_list.per_page) - loop.index0 }}</td>
             <td>{{ question.category.category_text }}</td>
-            <td class="text-start">
-                <a href="{{ url_for('question.detail', question_id=question.id) }}">{{ question.subject }}</a>
+            <td class="text-start" style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 0px;">
+                <a class="a-none-deco" href="{{ url_for('question.detail', question_id=question.id) }}">{{ question.subject }}</a>
                 {% if question.answer_set|length > 0 %}
                 <span class="text-danger small mx-2">{{ question.answer_set|length }}</span>
                 {% endif %}
             </td>
-            <td>{{ question.user.username }}</td>
+            <td class="col-sm-2">
+                <a href="#" class="a-none-deco">{{ question.user.username }}</a>
+            </td>
             <td>{{ question.create_date|datetime }}</td>
             <td>{{ question.num_views }}</td>
             <td>{{ question.num_voter }}</td>
@@ -112,6 +109,16 @@
         {% endif %}
     </ul>
     <!-- 페이징 처리 End -->
+
+    <!-- 검색창 -->
+    <div class="d-flex justify-content-center">
+        <div class="input-group w-25">
+            <input type="text" id="search_kw" class="form-control mx-2" value="{{ kw or '' }}">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" id="btn_search">찾기</button>
+            </div>
+        </div>
+    </div>
 </div>
 <form id="searchForm" method="get" action="{{ url_for('question._list') }}">
     <input type="hidden" id="kw" name="kw" value="{{ kw or '' }}">

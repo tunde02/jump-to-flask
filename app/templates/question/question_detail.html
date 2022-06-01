@@ -3,22 +3,32 @@
 <div class="container my-3">
     {% include 'form_errors.html' %}
     <!-- 질문 -->
-    <h2 class="border-bottom py-2">[{{ question.category.category_text }}] {{ question.subject }}</h2>
+    <div class="d-flex justify-content-between border-bottom py-1">
+        <h2>[{{ question.category.category_text }}] {{ question.subject }}</h2>
+        <div class="d-flex flex-row">
+            {% if question.modify_date %}
+            <ul class="badge list-group list-group-horizontal">
+                <li class="list-group-item align-self-center bg-light">
+                    <span>수정됨</span>
+                </li>
+                <li class="list-group-item align-self-center">
+                    <span>{{ question.modify_date|datetime_detail }}</span>
+                </li>
+            </ul>
+            {% endif %}
+            <ul class="badge list-group list-group-horizontal">
+                <li class="list-group-item align-self-center bg-light">
+                    <span><a href="#" class="a-none-deco">{{ question.user.username }}</a></span>
+                </li>
+                <li class="list-group-item align-self-center">
+                    <span>{{ question.create_date|datetime_detail }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
     <div class="card my-3">
         <div class="card-body">
             <div class="card-text" id="question_content">{{ question.content|safe }}</div>
-            <div class="d-flex justify-content-end">
-                {% if question.modify_date %}
-                <div class="badge bg-light p-2 text-dark text-start mx-3">
-                    <div class="mb-2">수정 시간</div>
-                    <div>{{ question.modify_date|datetime }}</div>
-                </div>
-                {% endif %}
-                <div class="badge bg-light p-2 text-dark text-start">
-                    <div class="mb-2">{{ question.user.username }}</div>
-                    <div>{{ question.create_date|datetime }}</div>
-                </div>
-            </div>
             <div class="my-3">
                 {% if g.user %}
                 {% if not (g.user in question.voter) %}
@@ -48,36 +58,46 @@
         </div>
     </div>
 
-    <!-- 답변 목록 -->
-    <div class="d-flex justify-content-between">
-        <h5 class="border-bottom">{{ question.answer_set|length }}개의 답변이 있습니다.</h5>
+    <!-- 답변 목록 Start-->
+    <div class="border-bottom d-flex justify-content-between p-2">
+        <h5>{{ question.answer_set|length }}개의 답변이 있습니다.</h5>
         <div class="btn-group">
-            <button class="answer-sort-btn btn btn-sm btn-outline-primary {{ 'active' if sort == 0 }}" data-sort="{{ 0 }}">추천순</button>
-            <button class="answer-sort-btn btn btn-sm btn-outline-primary {{ 'active' if sort == 1 }}" data-sort="{{ 1 }}">최신순</button>
-            <button class="answer-sort-btn btn btn-sm btn-outline-primary {{ 'active' if sort == 2 }}" data-sort="{{ 2 }}">오래된순</button>
+            <button class="answer-sort-btn btn btn-sm btn-outline-primary align-self-center {{ 'active' if sort == 0 }}" data-sort="{{ 0 }}">추천순</button>
+            <button class="answer-sort-btn btn btn-sm btn-outline-primary align-self-center {{ 'active' if sort == 1 }}" data-sort="{{ 1 }}">최신순</button>
+            <button class="answer-sort-btn btn btn-sm btn-outline-primary align-self-center {{ 'active' if sort == 2 }}" data-sort="{{ 2 }}">오래된순</button>
         </div>
     </div>
     {% for answer in answer_list.items %}
     <a id="answer_{{ answer.id }}"></a>
     <div class="card my-3">
+        <!-- 답변 내용 Start -->
         <div class="card-body">
             <div class="card-text d-flex justify-content-between">
                 <div class="mx-2">
                     {{ answer.content|markdown }}
                 </div>
-                <div>
+                <div class="d-flex flex-column align-self-start">
+                    <ul class="badge list-group list-group-horizontal align-self-end">
+                        <li class="list-group-item align-self-center bg-light">
+                            <span><a href="#" class="a-none-deco">{{ answer.user.username }}</a></span>
+                        </li>
+                        <li class="list-group-item align-self-center">
+                            <span>{{ answer.create_date|datetime_detail }}</span>
+                        </li>
+                    </ul>
                     {% if answer.modify_date %}
-                    <div class="badge bg-light text-dark text-start">
-                        <div class="mb-2">수정 시간</div>
-                        <div>{{ answer.modify_date|datetime }}</div>
-                    </div>
+                    <ul class="badge list-group list-group-horizontal align-self-end">
+                        <li class="list-group-item align-self-center bg-light">
+                            <span>수정됨</span>
+                        </li>
+                        <li class="list-group-item align-self-center">
+                            <span>{{ answer.modify_date|datetime_detail }}</span>
+                        </li>
+                    </ul>
                     {% endif %}
-                    <div class="badge bg-light text-dark text-start">
-                        <div class="mb-2">{{ answer.user.username }}</div>
-                        <div>{{ answer.create_date|datetime }}</div>
-                    </div>
                 </div>
             </div>
+            <!-- 답변 버튼 목록 -->
             <div class="mx-2">
                 <a href="javascript:answer_comment({{ answer.id }})" class="comment btn btn-sm btn-outline-primary">
                     댓글
@@ -100,16 +120,18 @@
                 {% endif %}
             </div>
         </div>
+        <!-- 답변 내용 End -->
+
         <!-- 답변 댓글 Start -->
         <div class="comment-list">
             {% for comment in answer.comment_set %}
-            <div class="border-top d-flex justify-content-between px-2 py-2" style="font-size: 0.9em;">
+            <div class="border-top d-flex justify-content-between px-2 py-1" style="font-size: 0.9em;">
                 <div class="d-flex justify-content-start">
-                    <div class="badge bg-light text-dark text-start" style="height: fit-content;">
-                        <div class="mb-2">{{ comment.user.username }}</div>
-                        <div>{{ comment.create_date|datetime }}</div>
-                    </div>
-                    <div class="mx-3">{{ comment.content|markdown }}</div>
+                    <ul class="badge list-group">
+                        <li class="list-group-item bg-light"><a href="#" class="a-none-deco">{{ comment.user.username }}</a></li>
+                        <li class="list-group-item">{{ comment.create_date|datetime_detail }}</li>
+                    </ul>
+                    <div class="mx-3 align-self-start">{{ comment.content|markdown }}</div>
                 </div>
                 {% if g.user == comment.user %}
                 <a class="btn btn-sm" href="{{ url_for('comment.delete', comment_id=comment.id) }}">
@@ -129,6 +151,7 @@
         <!-- 답변 댓글 End -->
     </div>
     {% endfor %}
+    <!-- 답변 목록 End -->
 
     <!-- 답변 페이징 Start -->
     <ul class="pagination justify-content-center">
@@ -173,17 +196,17 @@
             <a class="page-link" href="javascript:void(0)" tabindex="-1" aria-disabled="true">다음</a>
         </li>
         {% endif %}
-
     </ul>
     <!-- 답변 페이징 End -->
 
     <!-- 답변 등록 -->
+    <h4 class="border-bottom p-2">답변 등록</h2>
     <form action="{{ url_for('answer.create', question_id=question.id) }}" method="post" class="my-3">
         {{ form.csrf_token }}
         <div class="mb-3">
             <textarea {% if not g.user %}disabled{% endif %} name="content" id="content" class="form-control" rows="10">{{ form.content.data or '' }}</textarea>
         </div>
-        <input type="submit" value="답변등록" class="btn btn-primary">
+        <input type="submit" value="답변 등록" class="btn btn-primary">
     </form>
 </div>
 <form id="searchForm" method="get" action="{{ url_for('question.detail', question_id=question.id) }}">

@@ -14,9 +14,12 @@
         <div class="mb-3">
             <label for="category">카테고리</label>
             <select class="form-select" name="category_type" id="category_type">
-                <option value="NOTICE" {% if form.category_type.data == "NOTICE" %}selected{% endif %}>공지</option>
                 <option value="FREE" {% if form.category_type.data == "FREE" %}selected{% endif %}>자유</option>
                 <option value="QUESTION" {% if form.category_type.data == "QUESTION" %}selected{% endif %}>질문</option>
+                <option value="INFORMATION" {% if form.category_type.data == "INFORMATION" %}selected{% endif %}>정보</option>
+                <option value="BOAST" {% if form.category_type.data == "BOAST" %}selected{% endif %}>비틱</option>
+                <option value="SUGGESTION" {% if form.category_type.data == "SUGGESTION" %}selected{% endif %}>건의</option>
+                <option value="NOTICE" {% if form.category_type.data == "NOTICE" %}selected{% endif %}>공지</option>
             </select>
         </div>
         <div class="mb-3">
