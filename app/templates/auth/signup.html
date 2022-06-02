@@ -2,12 +2,16 @@
 {% block content %}
 <div class="container">
     <h5 class="my-3 border-bottom pb-2">계정생성</h5>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {{ form.csrf_token }}
         {% include "form_errors.html" %}
         <div class="mb-3">
-            <label for="username">사용자 이름</label>
+            <label for="username">아이디</label>
             <input type="text" class="form-control" name="username" id="username" value="{{ form.username.data or '' }}">
+        </div>
+        <div class="mb-3">
+            <label for="nickname">닉네임</label>
+            <input type="text" class="form-control" name="nickname" id="nickname" value="{{ form.nickname.data or '' }}">
         </div>
         <div class="mb-3">
             <label for="password1">비밀번호</label>
@@ -20,6 +24,14 @@
         <div class="mb-3">
             <label for="email">이메일</label>
             <input type="text" class="form-control" name="email" id="email" value="{{ form.email.data or '' }}">
+        </div>
+        <div class="mb-3">
+            <label for="about_me">자기소개</label>
+            <textarea class="form-control" name="about_me" id="about_me" rows="5" style="resize: none;">{{ form.about_me.data or '' }}</textarea>
+        </div>
+        <div class="mb-3">
+            <label for="profile_image">프로필 사진</label>
+            <input type="file" class="form-control" name="profile_image" id="profile_image" value="profile_image">
         </div>
         <button type="submit" class="btn btn-primary">생성하기</button>
     </form>
