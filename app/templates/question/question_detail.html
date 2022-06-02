@@ -18,7 +18,7 @@
             {% endif %}
             <ul class="badge list-group list-group-horizontal">
                 <li class="list-group-item align-self-center bg-light">
-                    <span><a href="#" class="a-none-deco">{{ question.user.username }}</a></span>
+                    <span><a href="#" class="a-none-deco">{{ question.user.nickname }}</a></span>
                 </li>
                 <li class="list-group-item align-self-center">
                     <span>{{ question.create_date|datetime_detail }}</span>
@@ -79,7 +79,7 @@
                 <div class="d-flex flex-column align-self-start">
                     <ul class="badge list-group list-group-horizontal align-self-end">
                         <li class="list-group-item align-self-center bg-light">
-                            <span><a href="#" class="a-none-deco">{{ answer.user.username }}</a></span>
+                            <span><a href="#" class="a-none-deco">{{ answer.user.nickname }}</a></span>
                         </li>
                         <li class="list-group-item align-self-center">
                             <span>{{ answer.create_date|datetime_detail }}</span>
@@ -128,7 +128,7 @@
             <div class="border-top d-flex justify-content-between px-2 py-1" style="font-size: 0.9em;">
                 <div class="d-flex justify-content-start">
                     <ul class="badge list-group">
-                        <li class="list-group-item bg-light"><a href="#" class="a-none-deco">{{ comment.user.username }}</a></li>
+                        <li class="list-group-item bg-light"><a href="#" class="a-none-deco">{{ comment.user.nickname }}</a></li>
                         <li class="list-group-item">{{ comment.create_date|datetime_detail }}</li>
                     </ul>
                     <div class="mx-3 align-self-start">{{ comment.content|markdown }}</div>

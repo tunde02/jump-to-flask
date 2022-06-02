@@ -6,3 +6,5 @@ migration/__pycache__
 
 migrations
 app/static/images
+
+logs
