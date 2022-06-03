@@ -42,14 +42,14 @@
         <tr class="text-center">
             <td>{{ question_list.total - ((question_list.page - 1) * question_list.per_page) - loop.index0 }}</td>
             <td>{{ question.category.category_text }}</td>
-            <td class="text-start" style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 0px;">
+            <td class="text-start text-ellipsis">
                 <a class="a-none-deco" href="{{ url_for('question.detail', question_id=question.id) }}">{{ question.subject }}</a>
                 {% if question.answer_set|length > 0 %}
                 <span class="text-danger small mx-2">{{ question.answer_set|length }}</span>
                 {% endif %}
             </td>
             <td class="col-sm-2">
-                <a href="#" class="a-none-deco">{{ question.user.nickname }}</a>
+                <a href="{{ url_for('profile.info', username=question.user.username) }}" class="a-none-deco">{{ question.user.nickname }}</a>
             </td>
             <td>{{ question.create_date|datetime }}</td>
             <td>{{ question.num_views }}</td>

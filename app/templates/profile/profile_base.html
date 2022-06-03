@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3 border d-flex flex-column p-3">
+            <div class="align-self-center">
+                <img src="{{ url_for('static', filename=user.profile_image) }}" alt="{{ url_for('static', filename='images/default_profile.png') }}" class="rounded img-thumbnail" width="300">
+            </div>
+            <div class="d-flex justify-content-center my-3">
+                <span class="font-weight-bold my-2" style="font-size: 1.2em;">{{ user.nickname }} ({{ user.username }})</span>
+            </div>
+            <div class="d-flex flex-column">
+                <a href="{{ url_for('profile.info', username=user.username) }}" class="btn btn-outline-secondary mb-2 {{ 'active' if tab == 'info' }}">내정보</a>
+                <a href="{{ url_for('profile.recent', username=user.username) }}" class="btn btn-outline-secondary mb-2 {{ 'active' if tab == 'recent' }}">최근 알림</a>
+                <a href="{{ url_for('profile.modify', username=user.username) }}" class="btn btn-outline-secondary mb-2 {{ 'active' if tab == 'modify' }}">내정보 수정</a>
+                <a href="{{ url_for('profile.withdrawl', username=user.username) }}" class="btn btn-danger mb-2 {{ 'active' if tab == 'withdrawl' }}">회원 탈퇴</a>
+            </div>
+        </div>
+        <div class="col-md-9 border p-3">
+            {% block profile_content %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

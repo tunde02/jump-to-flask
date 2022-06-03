@@ -1,0 +1,188 @@
+{% extends 'profile/profile_base.html' %}
+{% block profile_content %}
+<!-- 이메일 -->
+<div class="mb-5">
+    <h5 class="border-bottom p-2">이메일</h5>
+    <span class="p-2" style="font-size: 1.2em;">{{ user.email }}</span>
+</div>
+
+<!-- 자기소개 -->
+<div class="mb-5">
+    <h5 class="border-bottom p-2">자기소개</h5>
+    <span class="p-2" style="font-size: 1.2em;">{{ user.about_me }}</span>
+</div>
+
+<!-- 내가 쓴 글 Start -->
+<div>
+    <h5 class="border-bottom p-2">내가 쓴 글</h5>
+    <table class="table">
+        <thead>
+        <tr class="text-center table-dark">
+            <th class="col-sm-1">번호</th>
+            <th class="col-sm-1">종류</th>
+            <th class="col-sm-7">제목</th>
+            <th class="col-sm-1">추천</th>
+            <th class="col-sm-1">작성일</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if user_question_list and (user_question_list.items|length > 0) %}
+        {% for question in user_question_list.items %}
+        <tr class="text-center">
+            <td>{{ user_question_list.total - ((user_question_list.page - 1) * user_question_list.per_page) - loop.index0 }}</td>
+            <td>{{ question.category.category_text }}</td>
+            <td class="text-start text-ellipsis">
+                <a class="a-none-deco" href="{{ url_for('question.detail', question_id=question.id) }}">{{ question.subject }}</a>
+                {% if question.answer_set|length > 0 %}
+                <span class="text-danger small mx-2">{{ question.answer_set|length }}</span>
+                {% endif %}
+            </td>
+            <td>{{ question.voter|length }}</td>
+            <td>{{ question.create_date|datetime }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr class="text-center">
+            <td colspan="12">작성한 글이 없습니다.</td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+
+    <!-- 페이징 처리 Start -->
+    <ul class="pagination justify-content-end">
+        <!-- 이전 페이지 -->
+        {% if user_question_list.has_prev %}
+        <li class="page-item">
+            <a class="page-link" data-question_list_page="{{ user_question_list.prev_num }}" href="javascript:select_question_list_page({{ user_question_list.prev_num }})">이전</a>
+        </li>
+        {% endif %}
+
+        <!-- 페이지 목록 -->
+        {% for page_num in user_question_list.iter_pages() %}
+        {% if page_num %}
+        {% if page_num != user_question_list.page %}
+        <li class="page-item">
+            <a class="page-link" data-question_list_page="{{ page_num }}" href="javascript:select_question_list_page({{ page_num }})">{{ page_num }}</a>
+        </li>
+        {% else %}
+        <!-- 현재 페이지 링크 비활성화 -->
+        <li class="page-item active" aria-current="page">
+            <a href="javascript:void(0)" class="page-link" style="pointer-events: none;">{{ page_num }}</a>
+        </li>
+        {% endif %}
+        {% else%}
+        <li class="disabled">
+            <a href="javascript:void(0)" class="page-link">...</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+
+        <!-- 다음 페이지 -->
+        {% if user_question_list.has_next %}
+        <li class="page-item">
+            <a class="page-link" data-question_list_page="{{ user_question_list.next_num }}" href="javascript:void(0)">다음</a>
+        </li>
+        {% endif %}
+    </ul>
+    <!-- 페이징 처리 End -->
+</div>
+<!-- 내가 쓴 글 End -->
+
+<!-- 내가 쓴 댓글 Start -->
+<div>
+    <h5 class="border-bottom p-2">내가 쓴 댓글</h5>
+    <table class="table">
+        <thead>
+        <tr class="text-center table-dark">
+            <th class="col-sm-1">번호</th>
+            <th class="col-sm-4">글 제목</th>
+            <th class="col-sm-4">내용</th>
+            <th class="col-sm-1">추천</th>
+            <th class="col-sm-1">작성일</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if user_answer_list and (user_answer_list.items|length > 0) %}
+        {% for answer in user_answer_list.items %}
+        <tr class="text-center">
+            <td>{{ user_answer_list.total - ((user_answer_list.page - 1) * user_answer_list.per_page) - loop.index0 }}</td>
+            <td class="text-start text-ellipsis">
+                <a class="a-none-deco" href="{{ url_for('question.detail', question_id=answer.question.id) }}">{{ answer.question.subject }}</a>
+            </td>
+            <td class="text-start text-ellipsis">
+                <a class="a-none-deco" href="{{ url_for('question.detail', question_id=answer.question.id, _anchor='answer_%s' % answer.id) }}">{{ answer.content }}</a>
+                {% if answer.question.answer_set|length > 0 %}
+                <span class="text-danger small mx-2">{{ answer.question.answer_set|length }}</span>
+                {% endif %}
+            </td>
+            <td>{{ answer.num_voter }}</td>
+            <td>{{ answer.create_date|datetime }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr class="text-center">
+            <td colspan="12">작성한 답변이 없습니다.</td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+
+    <!-- 페이징 처리 Start -->
+    <ul class="pagination justify-content-end">
+        <!-- 이전 페이지 -->
+        {% if user_answer_list.has_prev %}
+        <li class="page-item">
+            <a class="page-link" data-answer_list_page="{{ user_answer_list.prev_num }}" href="javascript:select_answer_list_page({{ user_answer_list.prev_num }})">이전</a>
+        </li>
+        {% endif %}
+
+        <!-- 페이지 목록 -->
+        {% for page_num in user_answer_list.iter_pages() %}
+        {% if page_num %}
+        {% if page_num != user_answer_list.page %}
+        <li class="page-item">
+            <a class="page-link" data-answer_list_page="{{ page_num }}" href="javascript:select_answer_list_page({{ page_num }})">{{ page_num }}</a>
+        </li>
+        {% else %}
+        <!-- 현재 페이지 링크 비활성화 -->
+        <li class="page-item active" aria-current="page">
+            <a href="javascript:void(0)" class="page-link" style="pointer-events: none;">{{ page_num }}</a>
+        </li>
+        {% endif %}
+        {% else%}
+        <li class="disabled">
+            <a href="javascript:void(0)" class="page-link">...</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+
+        <!-- 다음 페이지 -->
+        {% if user_answer_list.has_next %}
+        <li class="page-item">
+            <a class="page-link" data-answer_list_page="{{ user_answer_list.next_num }}" href="javascript:void(0)">다음</a>
+        </li>
+        {% endif %}
+    </ul>
+    <!-- 페이징 처리 End -->
+</div>
+<!-- 내가 쓴 댓글 End -->
+<form id="profileForm" method="get" action="{{ url_for('profile.info', username=g.user.username) }}">
+    <input type="hidden" name="question_list_page" id="question_list_page" value="{{ question_list_page }}">
+    <input type="hidden" name="answer_list_page" id="answer_list_page" value="{{ answer_list_page }}">
+</form>
+{% endblock %}
+
+{% block script %}
+<script>
+function select_question_list_page(page) {
+    document.getElementById("question_list_page").value = page;
+    document.getElementById("profileForm").submit();
+}
+
+function select_answer_list_page(page) {
+    document.getElementById("answer_list_page").value = page;
+    document.getElementById("profileForm").submit();
+}
+</script>
+{% endblock %}
