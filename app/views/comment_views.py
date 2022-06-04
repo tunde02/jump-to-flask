@@ -2,9 +2,9 @@ from datetime import datetime
 from flask import Blueprint, url_for, request, render_template, g, flash
 from werkzeug.utils import redirect
 from app import db
-from app.models import Answer, Comment
+from app.models import Question, Answer, Comment
 from app.forms import CommentForm
-from app.views.auth_views import login_required
+from app.views.auth_views import login_required, update_num_notice
 
 
 bp = Blueprint('comment', __name__, url_prefix='/comment')
@@ -18,6 +18,10 @@ def create(answer_id):
 
     if form.validate_on_submit():
         comment = Comment(answer=answer, user=g.user, content=request.form['content'], create_date=datetime.now())
+
+        if g.user.id != answer.user.id:
+            answer.is_updated = True
+            update_num_notice(answer.user)
 
         db.session.add(comment)
         db.session.commit()

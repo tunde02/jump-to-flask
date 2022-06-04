@@ -10,10 +10,23 @@
                 <span class="font-weight-bold my-2" style="font-size: 1.2em;">{{ user.nickname }} ({{ user.username }})</span>
             </div>
             <div class="d-flex flex-column">
-                <a href="{{ url_for('profile.info', username=user.username) }}" class="btn btn-outline-secondary mb-2 {{ 'active' if tab == 'info' }}">내정보</a>
-                <a href="{{ url_for('profile.recent', username=user.username) }}" class="btn btn-outline-secondary mb-2 {{ 'active' if tab == 'recent' }}">최근 알림</a>
-                <a href="{{ url_for('profile.modify', username=user.username) }}" class="btn btn-outline-secondary mb-2 {{ 'active' if tab == 'modify' }}">내정보 수정</a>
+                <a href="{{ url_for('profile.info', username=user.username) }}" class="btn btn-outline-primary mb-2 {{ 'active' if tab == 'info' }}">내정보</a>
+                {% if g.user and g.user == user %}
+                <div class="d-flex position-relative mb-2">
+                    <a href="{{ url_for('profile.recent', username=user.username) }}" class="btn btn-outline-primary flex-fill {{ 'active' if tab == 'recent' }}">
+                        최근 알림
+                    </a>
+                    <span class="position-absolute top-50 end-0 translate-middle badge rounded-pill {{ 'bg-secondary' if user.num_notice == 0 else 'bg-danger' }} mx-5" style="font-size: 1em;">
+                        {{ user.num_notice }}
+                    </span>
+                </div>
+                <a href="{{ url_for('profile.modify', username=user.username) }}" class="btn btn-outline-primary mb-2 {{ 'active' if tab == 'modify' }}">내정보 수정</a>
                 <a href="{{ url_for('profile.withdrawl', username=user.username) }}" class="btn btn-danger mb-2 {{ 'active' if tab == 'withdrawl' }}">회원 탈퇴</a>
+                {% else %}
+                <a href="javascript:void(0)" class="disabled btn btn-outline-secondary mb-2">최근 알림</a>
+                <a href="javascript:void(0)" class="disabled btn btn-outline-secondary mb-2">내정보 수정</a>
+                <a href="javascript:void(0)" class="disabled btn btn-outline-secondary mb-2">회원 탈퇴</a>
+                {% endif %}
             </div>
         </div>
         <div class="col-md-9 border p-3">

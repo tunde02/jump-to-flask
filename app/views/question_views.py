@@ -7,7 +7,7 @@ from werkzeug.utils import redirect, secure_filename
 from app import db
 from app.models import Question, Answer, User, Category
 from app.forms import QuestionForm, AnswerForm
-from app.views.auth_views import login_required
+from app.views.auth_views import login_required, update_num_notice
 from config.development import UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 
 
@@ -105,6 +105,7 @@ def detail(question_id):
     sort = request.args.get('sort', type=int, default=0)
     answer_list = Answer.query.filter(Answer.question_id == question.id)
 
+    # 답변 정렬
     if sort == 0: # 추천순
         answer_list = answer_list.order_by(Answer.num_voter.desc(), Answer.create_date.desc())
     elif sort == 1: # 최신순
@@ -112,10 +113,23 @@ def detail(question_id):
     elif sort == 2: # 오래된순
         answer_list = answer_list.order_by(Answer.create_date)
 
-    answer_list = answer_list.paginate(page, per_page=5)
-
+    # 조회수
     question.num_views += 1
+
+    # 알림 갱신
+    if g.user:
+        if g.user == question.user:
+            question.is_updated = False
+
+        g_user_answer_list = answer_list.filter(Answer.user_id == g.user.id).all()
+        for answer in g_user_answer_list:
+            answer.is_updated = False
+
+        update_num_notice(g.user)
+
     db.session.commit()
+
+    answer_list = answer_list.paginate(page, per_page=5)
 
     return render_template('question/question_detail.html', question=question, answer_list=answer_list, form=form, sort=sort)
 

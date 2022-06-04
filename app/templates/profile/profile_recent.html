@@ -1,4 +1,137 @@
 {% extends 'profile/profile_base.html' %}
 {% block profile_content %}
-profile_recent.html
+<!-- 내가 쓴 글 Start -->
+<div>
+    <div class="border-bottom d-flex justify-content-between p-2 mb-3">
+        <h5>내가 쓴 글</h5>
+        <a class="btn btn-lg" href="javascript:check_selected()" style="padding: 0px;">
+            <i class="bi bi-trash"></i>
+        </a>
+    </div>
+    <table class="table">
+        <thead>
+        <tr class="text-center table-dark">
+            <th class="col-sm-1">선택<input id="check_all" class="form-check-input mx-2" type="checkbox" style="width: 20px; height: 20px;"></th>
+            <th class="col-sm-1">번호</th>
+            <th class="col-sm-1">종류</th>
+            <th class="col-sm-7">내용</th>
+            <th class="col-sm-1">작성일</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if recent_list and (recent_list.items|length > 0) %}
+        {% for post in recent_list.items %}
+        <tr class="text-center">
+            <td>
+                {% if post.notice_info == '새 답변' %}
+                <input class="form-check-input check_one" type="checkbox" data-selected="{{ 'QUESTION-%s' % post.id }}" style="width: 20px; height: 20px;"></input>
+                {% else %}
+                <input class="form-check-input check_one" type="checkbox" data-selected="{{ 'ANSWER-%s' % post.id }}" style="width: 20px; height: 20px;"></input>
+                {% endif %}
+            </td>
+            <td>{{ recent_list.total - ((recent_list.page - 1) * recent_list.per_page) - loop.index0 }}</td>
+            <td>{{ post.notice_info }}</td>
+            <td class="text-start text-ellipsis">
+                {% if post.notice_info == '새 답변' %}
+                <a class="a-none-deco" href="{{ url_for('question.detail', question_id=post.post_id) }}">{{ post.content }}</a>
+                {% else %}
+                <a class="a-none-deco" href="{{ url_for('question.detail', question_id=post.post_id, _anchor='answer_%s' % post.id) }}">{{ post.content }}</a>
+                {% endif %}
+            </td>
+            <td>{{ post.create_date|datetime }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr class="text-center">
+            <td colspan="12">최근 알림이 없습니다.</td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+
+    <!-- 페이징 처리 Start -->
+    <ul class="pagination justify-content-end">
+        <!-- 이전 페이지 -->
+        {% if recent_list.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="javascript:select_page({{ recent_list.prev_num }})">이전</a>
+        </li>
+        {% endif %}
+
+        <!-- 페이지 목록 -->
+        {% for page_num in recent_list.iter_pages() %}
+        {% if page_num %}
+        {% if page_num != recent_list.page %}
+        <li class="page-item">
+            <a class="page-link" href="javascript:select_page({{ page_num }})">{{ page_num }}</a>
+        </li>
+        {% else %}
+        <!-- 현재 페이지 링크 비활성화 -->
+        <li class="page-item active" aria-current="page">
+            <a class="page-link" href="javascript:void(0)" style="pointer-events: none;">{{ page_num }}</a>
+        </li>
+        {% endif %}
+        {% else%}
+        <li class="disabled">
+            <a class="page-link" href="javascript:void(0)">...</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+
+        <!-- 다음 페이지 -->
+        {% if recent_list.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="javascript:select_page({{ recent_list.next_num }})">다음</a>
+        </li>
+        {% endif %}
+    </ul>
+    <!-- 페이징 처리 End -->
+</div>
+<!-- 내가 쓴 글 End -->
+<form id="profileForm" method="post" action="{{ url_for('profile.recent', username=user.username) }}">
+    <input type="hidden" name="page" id="page" value="{{ page }}">
+    <input type="hidden" name="selected" id="selected">
+</form>
+{% endblock %}
+
+{% block script %}
+<script>
+function select_page(page) {
+    document.getElementById("page").value = page;
+    document.getElementById("profileForm").submit();
+}
+
+function check_selected() {
+    if (document.getElementById("selected").value != '') {
+        document.getElementById("page").value = 1;
+        document.getElementById("profileForm").submit();
+    } else {
+        alert('읽음 표시할 항목을 선택해주세요.');
+    }
+}
+
+const checkbox_elements = document.getElementsByClassName('check_one');
+Array.from(checkbox_elements).forEach(function(element) {
+    element.addEventListener('change', function() {
+        selected_input = document.getElementById('selected')
+
+        if (selected_input.value.includes(this.dataset.selected)) {
+            selected_input.value = selected_input.value.replace(this.dataset.selected + '|', '');
+        } else {
+            selected_input.value += this.dataset.selected + '|';
+        }
+    });
+});
+
+var check_flag = false;
+document.getElementById('check_all').addEventListener('change', function() {
+    for (var checkbox of checkbox_elements) {
+        if (!(check_flag ^ checkbox.checked)) {
+            checkbox.click();
+        }
+    }
+
+    check_flag = !check_flag;
+});
+</script>
 {% endblock %}

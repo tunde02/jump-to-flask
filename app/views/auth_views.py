@@ -28,6 +28,12 @@ def login_required(view):
     return wrapped_view
 
 
+def update_num_notice(user):
+    unchecked_question_list = Question.query.filter(Question.user_id == user.id).filter(Question.is_updated == True)
+    unchecked_answer_list = Answer.query.filter(Answer.user_id == user.id).filter(Answer.is_updated == True)
+    user.num_notice = unchecked_question_list.count() + unchecked_answer_list.count()
+
+
 @bp.route('/signup', methods=['GET', 'POST'])
 def signup():
     form = UserCreateForm()

@@ -54,7 +54,7 @@
         <!-- 이전 페이지 -->
         {% if user_question_list.has_prev %}
         <li class="page-item">
-            <a class="page-link" data-question_list_page="{{ user_question_list.prev_num }}" href="javascript:select_question_list_page({{ user_question_list.prev_num }})">이전</a>
+            <a class="page-link" href="javascript:select_question_list_page({{ user_question_list.prev_num }})">이전</a>
         </li>
         {% endif %}
 
@@ -63,7 +63,7 @@
         {% if page_num %}
         {% if page_num != user_question_list.page %}
         <li class="page-item">
-            <a class="page-link" data-question_list_page="{{ page_num }}" href="javascript:select_question_list_page({{ page_num }})">{{ page_num }}</a>
+            <a class="page-link" href="javascript:select_question_list_page({{ page_num }})">{{ page_num }}</a>
         </li>
         {% else %}
         <!-- 현재 페이지 링크 비활성화 -->
@@ -81,7 +81,7 @@
         <!-- 다음 페이지 -->
         {% if user_question_list.has_next %}
         <li class="page-item">
-            <a class="page-link" data-question_list_page="{{ user_question_list.next_num }}" href="javascript:void(0)">다음</a>
+            <a class="page-link" href="javascript:select_question_list_page({{ user_question_list.next_num }})">다음</a>
         </li>
         {% endif %}
     </ul>
@@ -109,12 +109,12 @@
             <td>{{ user_answer_list.total - ((user_answer_list.page - 1) * user_answer_list.per_page) - loop.index0 }}</td>
             <td class="text-start text-ellipsis">
                 <a class="a-none-deco" href="{{ url_for('question.detail', question_id=answer.question.id) }}">{{ answer.question.subject }}</a>
-            </td>
-            <td class="text-start text-ellipsis">
-                <a class="a-none-deco" href="{{ url_for('question.detail', question_id=answer.question.id, _anchor='answer_%s' % answer.id) }}">{{ answer.content }}</a>
                 {% if answer.question.answer_set|length > 0 %}
                 <span class="text-danger small mx-2">{{ answer.question.answer_set|length }}</span>
                 {% endif %}
+            </td>
+            <td class="text-start text-ellipsis">
+                <a class="a-none-deco" href="{{ url_for('question.detail', question_id=answer.question.id, _anchor='answer_%s' % answer.id) }}">{{ answer.content }}</a>
             </td>
             <td>{{ answer.num_voter }}</td>
             <td>{{ answer.create_date|datetime }}</td>
@@ -133,7 +133,7 @@
         <!-- 이전 페이지 -->
         {% if user_answer_list.has_prev %}
         <li class="page-item">
-            <a class="page-link" data-answer_list_page="{{ user_answer_list.prev_num }}" href="javascript:select_answer_list_page({{ user_answer_list.prev_num }})">이전</a>
+            <a class="page-link" href="javascript:select_answer_list_page({{ user_answer_list.prev_num }})">이전</a>
         </li>
         {% endif %}
 
@@ -142,7 +142,7 @@
         {% if page_num %}
         {% if page_num != user_answer_list.page %}
         <li class="page-item">
-            <a class="page-link" data-answer_list_page="{{ page_num }}" href="javascript:select_answer_list_page({{ page_num }})">{{ page_num }}</a>
+            <a class="page-link" href="javascript:select_answer_list_page({{ page_num }})">{{ page_num }}</a>
         </li>
         {% else %}
         <!-- 현재 페이지 링크 비활성화 -->
@@ -160,14 +160,14 @@
         <!-- 다음 페이지 -->
         {% if user_answer_list.has_next %}
         <li class="page-item">
-            <a class="page-link" data-answer_list_page="{{ user_answer_list.next_num }}" href="javascript:void(0)">다음</a>
+            <a class="page-link" href="javascript:select_answer_list_page({{ user_answer_list.next_num }})">다음</a>
         </li>
         {% endif %}
     </ul>
     <!-- 페이징 처리 End -->
 </div>
 <!-- 내가 쓴 댓글 End -->
-<form id="profileForm" method="get" action="{{ url_for('profile.info', username=g.user.username) }}">
+<form id="profileForm" method="get" action="{{ url_for('profile.info', username=user.username) }}">
     <input type="hidden" name="question_list_page" id="question_list_page" value="{{ question_list_page }}">
     <input type="hidden" name="answer_list_page" id="answer_list_page" value="{{ answer_list_page }}">
 </form>

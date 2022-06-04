@@ -4,7 +4,7 @@ from werkzeug.utils import redirect
 from app import db
 from app.models import Question, Answer, Comment
 from app.forms import AnswerForm, CommentForm
-from app.views.auth_views import login_required
+from app.views.auth_views import login_required, update_num_notice
 
 
 bp = Blueprint('answer', __name__, url_prefix='/answer')
@@ -18,6 +18,10 @@ def create(question_id):
 
     if form.validate_on_submit():
         answer = Answer(question=question, content=request.form['content'], create_date=datetime.now(), user=g.user)
+
+        if g.user.id != question.user.id:
+            question.is_updated = True
+            update_num_notice(question.user)
 
         db.session.add(answer)
         db.session.commit()

@@ -1,4 +1,5 @@
 from app import db
+from sqlalchemy.sql import expression
 
 
 question_voter = db.Table(
@@ -24,6 +25,7 @@ class Question(db.Model):
     category    = db.relationship('Category',
         back_populates='question', passive_deletes=True, uselist=False)
     num_views   = db.Column(db.Integer, nullable=False, default=0)
+    is_updated = db.Column(db.Boolean, nullable=False, default=False)
 
 
 answer_voter = db.Table(
@@ -49,6 +51,7 @@ class Answer(db.Model):
     voter       = db.relationship('User', secondary=answer_voter,
         backref=db.backref('answer_voter_set', passive_deletes=True))
     num_voter   = db.Column(db.Integer, nullable=False, default=0)
+    is_updated = db.Column(db.Boolean, nullable=False, default=False)
 
 
 class User(db.Model):
@@ -59,6 +62,7 @@ class User(db.Model):
     email    = db.Column(db.String(120), nullable=False)
     profile_image = db.Column(db.String(200), nullable=False, default='images/profile/default_profile.png')
     about_me = db.Column(db.String(200), nullable=False, default='')
+    num_notice = db.Column(db.Integer, nullable=False, default=0)
 
 
 class Comment(db.Model):
