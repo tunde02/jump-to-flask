@@ -1,8 +1,8 @@
 import os
 
-from flask import Blueprint, flash, render_template, request, g
+from flask import Blueprint, flash, render_template, request, g, url_for
 from werkzeug.security import generate_password_hash
-from werkzeug.utils import secure_filename
+from werkzeug.utils import secure_filename, redirect
 from sqlalchemy import desc, literal
 
 from app import db
@@ -113,8 +113,15 @@ def modify(username):
     return render_template('profile/profile_modify.html', user=user, tab='modify', form=form)
 
 
-@bp.route('/withdrawl/<string:username>')
+@bp.route('/withdrawl/<string:username>', methods=['GET', 'POST'])
 @login_required
 def withdrawl(username):
     user = User.query.filter_by(username=username).first()
+
+    if request.method == 'POST':
+        db.session.delete(user)
+        db.session.commit()
+
+        return redirect(url_for('main.index'))
+
     return render_template('profile/profile_withdrawl.html', user=user, tab='withdrawl')

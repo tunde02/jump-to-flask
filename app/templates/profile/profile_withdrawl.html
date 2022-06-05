@@ -1,4 +1,24 @@
 {% extends 'profile/profile_base.html' %}
 {% block profile_content %}
-profile_withdrawl.html
+<div class="mb-3">
+    <h5 class="border-bottom p-2">회원 탈퇴</h5>
+    <p class="p-2 text-danger" style="font-size: 1.2em;">
+        회원 탈퇴 시 회원 정보가 모두 삭제되며, 복구할 수 없습니다.<br>
+        정말로 탈퇴하시겠습니까?
+    </p>
+</div>
+<div class="d-flex justify-content-start mx-2">
+    <form action="{{ url_for('profile.withdrawl', username=user.username) }}" method="post" id="profileWithdrawlForm"></form>
+    <button onclick="checkWithdrawl()" class="btn btn-danger" style="width: 80px;">탈퇴</button>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+function checkWithdrawl() {
+    if (confirm("정말로 탈퇴하시겠습니까?")) {
+        document.getElementById('profileWithdrawlForm').submit()
+    }
+}
+</script>
 {% endblock %}
