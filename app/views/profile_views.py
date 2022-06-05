@@ -1,9 +1,15 @@
-from flask import Blueprint, render_template, request, g
+import os
+
+from flask import Blueprint, flash, render_template, request, g
+from werkzeug.security import generate_password_hash
+from werkzeug.utils import secure_filename
 from sqlalchemy import desc, literal
 
 from app import db
+from app.forms import UserModifyForm
 from app.models import User, Question, Answer
 from app.views.auth_views import login_required, update_num_notice
+from config.development import UPLOAD_FOLDER
 
 
 bp = Blueprint('profile', __name__, url_prefix='/profile')
@@ -62,11 +68,49 @@ def recent(username):
     return render_template('profile/profile_recent.html', user=user, tab='recent', recent_list=recent_list)
 
 
-@bp.route('/modify/<string:username>')
+@bp.route('/modify/<string:username>', methods=['GET', 'POST'])
 @login_required
 def modify(username):
     user = User.query.filter_by(username=username).first()
-    return render_template('profile/profile_modify.html', user=user, tab='modify')
+
+    if request.method == 'POST':
+        form = UserModifyForm()
+
+        if form.validate_on_submit():
+            error = None
+
+            if form.username.data != user.username and User.query.filter_by(username=form.username.data).first():
+                error = '이미 존재하는 아이디입니다.'
+            elif form.nickname.data != user.nickname and User.query.filter_by(nickname=form.nickname.data).first():
+                error = '이미 존재하는 닉네임입니다.'
+            elif form.email.data != user.email and User.query.filter_by(email=form.email.data).first():
+                error = '이미 존재하는 이메일입니다.'
+
+            if error is None:
+                if form.profile_image.data is not None:
+                    file_extension = form.profile_image.data.filename.rsplit('.', 1)[1].lower()
+                    file_name = secure_filename(f"{form.username.data}.{file_extension}")
+                    file_path = os.path.join(UPLOAD_FOLDER, 'profile', file_name)
+
+                    form.profile_image.data.save(file_path)
+                    form.profile_image.data = f"images/profile/{file_name}"
+                else:
+                    form.profile_image.data = user.profile_image
+
+                if  form.password.data != '':
+                    form.password.data = generate_password_hash(form.password.data)
+                else:
+                    form.password.data = user.password
+
+                form.populate_obj(user)
+
+                db.session.commit()
+            else:
+                flash(error)
+    else:
+        form = UserModifyForm(obj=user)
+
+    return render_template('profile/profile_modify.html', user=user, tab='modify', form=form)
 
 
 @bp.route('/withdrawl/<string:username>')

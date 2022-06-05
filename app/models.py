@@ -57,9 +57,9 @@ class Answer(db.Model):
 class User(db.Model):
     id       = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
-    nickname = db.Column(db.String(150), nullable=False, default='닉네임')
+    nickname = db.Column(db.String(150), unique=True, nullable=False, default='닉네임')
     password = db.Column(db.String(200), nullable=False)
-    email    = db.Column(db.String(120), nullable=False)
+    email    = db.Column(db.String(120), unique=True, nullable=False)
     profile_image = db.Column(db.String(200), nullable=False, default='images/profile/default_profile.png')
     about_me = db.Column(db.String(200), nullable=False, default='')
     num_notice = db.Column(db.Integer, nullable=False, default=0)

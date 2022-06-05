@@ -1,4 +1,67 @@
 {% extends 'profile/profile_base.html' %}
 {% block profile_content %}
-profile_modify.html
+<form method="post" id="profileModifyForm" enctype="multipart/form-data">
+    {{ form.csrf_token }}
+    {% include 'form_errors.html' %}
+    <!-- 프로필 사진 -->
+    <div class="mb-5">
+        <div class="d-flex justify-content-between border-bottom px-2 mb-2">
+            <h5>프로필 사진</h5>
+            <h6 class="text-danger align-self-center">※ 바꿀 때만 선택하세요!</h6>
+        </div>
+        <input type="file" class="form-control" name="profile_image" id="profile_image">
+    </div>
+
+    <!-- 닉네임 -->
+    <div class="mb-5">
+        <h5 class="border-bottom p-2">닉네임</h5>
+        <input type="text" class="form-control" name="nickname" value="{{ user.nickname }}" style="font-size: 1.1em;">
+    </div>
+
+    <!-- 이메일 -->
+    <div class="mb-5">
+        <h5 class="border-bottom p-2">이메일</h5>
+        <input type="text" class="form-control" name="email" value="{{ user.email }}" style="font-size: 1.1em;">
+    </div>
+
+    <!-- 자기소개 -->
+    <div class="mb-5">
+        <h5 class="border-bottom p-2">자기소개</h5>
+        <textarea class="form-control" name="about_me" rows="5" style="resize: none;">{{ form.about_me.data }}</textarea>
+    </div>
+
+    <!-- 아이디 -->
+    <div class="mb-5">
+        <h5 class="border-bottom p-2">아이디</h5>
+        <input type="text" class="form-control" name="username" value="{{ user.username }}" style="font-size: 1.1em;">
+    </div>
+
+    <!-- 비밀번호 -->
+    <div class="mb-5">
+        <div class="d-flex justify-content-between border-bottom px-2 mb-2">
+            <h5>비밀번호</h5>
+            <h6 class="text-danger align-self-center">※ 바꿀 때만 입력하세요!</h6>
+        </div>
+        <div class="mb-3">
+            <label for="password1">새 비밀번호</label>
+            <input type="password" class="form-control" name="password">
+        </div>
+        <div class="mb-3">
+            <label for="password2">새 비밀번호 확인</label>
+            <input type="password" class="form-control" name="password_verify">
+        </div>
+    </div>
+
+    <button onclick="checkModify()" class="btn btn-primary">수정</button>
+</form>
+{% endblock %}
+
+{% block script %}
+<script>
+function checkModify() {
+    if (confirm("정말로 수정하시겠습니까?")) {
+        document.getElementById('profileModifyForm').submit()
+    }
+}
+</script>
 {% endblock %}
